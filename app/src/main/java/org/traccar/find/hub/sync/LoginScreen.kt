@@ -1,0 +1,67 @@
+package org.traccar.find.hub.sync
+
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.webkit.CookieManager
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.viewinterop.AndroidView
+
+private const val TAG = "LoginScreen"
+private const val LOGIN_URL = "https://accounts.google.com/EmbeddedSetup"
+private const val COOKIE_CHECK_INTERVAL = 1000L
+
+@Composable
+fun LoginScreen(onTokenReceived: (String) -> Unit) {
+    val handler = remember { Handler(Looper.getMainLooper()) }
+    var found = remember { mutableListOf(false) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            handler.removeCallbacksAndMessages(null)
+        }
+    }
+
+    AndroidView(factory = { context ->
+        WebView(context).apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.userAgentString =
+                "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36"
+
+            CookieManager.getInstance().setAcceptCookie(true)
+            CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
+
+            fun checkForOAuthToken() {
+                if (found[0]) return
+                val cookies = CookieManager.getInstance().getCookie("https://accounts.google.com")
+                if (cookies != null) {
+                    val token = cookies.split("; ")
+                        .map { it.split("=", limit = 2) }
+                        .firstOrNull { it.size == 2 && it[0] == "oauth_token" }
+                        ?.get(1)
+                    if (token != null) {
+                        found[0] = true
+                        Log.i(TAG, "OAuth token retrieved")
+                        onTokenReceived(token)
+                        return
+                    }
+                }
+                handler.postDelayed({ checkForOAuthToken() }, COOKIE_CHECK_INTERVAL)
+            }
+
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    Log.d(TAG, "Page finished: $url")
+                    checkForOAuthToken()
+                }
+            }
+
+            loadUrl(LOGIN_URL)
+        }
+    })
+}
