@@ -32,7 +32,25 @@ class TokenStorage(context: Context) {
         prefs.edit().remove(KEY_OAUTH_TOKEN).apply()
     }
 
+    fun saveAasToken(token: String) {
+        prefs.edit().putString(KEY_AAS_TOKEN, token).apply()
+    }
+
+    fun getAasToken(): String? {
+        return prefs.getString(KEY_AAS_TOKEN, null)
+    }
+
+    fun saveEmail(email: String) {
+        prefs.edit().putString(KEY_EMAIL, email).apply()
+    }
+
+    fun getEmail(): String? {
+        return prefs.getString(KEY_EMAIL, null)
+    }
+
     companion object {
         private const val KEY_OAUTH_TOKEN = "oauth_token"
+        private const val KEY_AAS_TOKEN = "aas_token"
+        private const val KEY_EMAIL = "email"
     }
 }

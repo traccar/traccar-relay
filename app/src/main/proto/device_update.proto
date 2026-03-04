@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+package findhubsync;
+
+option java_package = "org.traccar.find.hub.sync.proto";
+
+message Time {
+    uint32 seconds = 1;
+    uint32 nanos = 2;
+}
+
+message DevicesList {
+    repeated DeviceMetadata deviceMetadata = 2;
+}
+
+message DevicesListRequest {
+    DevicesListRequestPayload deviceListRequestPayload = 1;
+}
+
+message DevicesListRequestPayload {
+    DeviceType type = 1;
+    string id = 3;
+}
+
+enum DeviceType {
+    UNKNOWN_DEVICE_TYPE = 0;
+    ANDROID_DEVICE = 1;
+    SPOT_DEVICE = 2;
+    TEST_DEVICE_TYPE = 3;
+    AUTO_DEVICE = 4;
+    FASTPAIR_DEVICE = 5;
+    SUPERVISED_ANDROID_DEVICE = 7;
+}
+
+message DeviceMetadata {
+    IdentifierInformation identifierInformation = 1;
+    DeviceInformation information = 4;
+    string userDefinedDeviceName = 5;
+    ImageInformation imageInformation = 6;
+}
+
+message ImageInformation {
+    string imageUrl = 1;
+}
+
+message IdentifierInformation {
+    PhoneInformation phoneInformation = 1;
+    IdentifierInformationType type = 2;
+    CanonicIds canonicIds = 3;
+}
+
+enum IdentifierInformationType {
+    IDENTIFIER_UNKNOWN = 0;
+    IDENTIFIER_ANDROID = 1;
+    IDENTIFIER_SPOT = 2;
+}
+
+message PhoneInformation {
+    CanonicIds canonicIds = 2;
+}
+
+message CanonicIds {
+    repeated CanonicId canonicId = 1;
+}
+
+message CanonicId {
+    string id = 1;
+}
+
+message DeviceInformation {
+    DeviceRegistration deviceRegistration = 1;
+    LocationInformation locationInformation = 2;
+    repeated AccessInformation accessInformation = 3;
+}
+
+message DeviceTypeInformation {
+    SpotDeviceType deviceType = 2;
+}
+
+message DeviceRegistration {
+    DeviceTypeInformation deviceTypeInformation = 2;
+    string manufacturer = 20;
+    string fastPairModelId = 21;
+    string model = 34;
+}
+
+message LocationInformation {
+    LocationsAndTimestampsWrapper reports = 3;
+}
+
+message LocationsAndTimestampsWrapper {
+    RecentLocationAndNetworkLocations recentLocationAndNetworkLocations = 4;
+}
+
+message RecentLocationAndNetworkLocations {
+    LocationReport recentLocation = 1;
+    Time recentLocationTimestamp = 2;
+    repeated LocationReport networkLocations = 5;
+    repeated Time networkLocationTimestamps = 6;
+}
+
+message LocationReport {
+    SemanticLocation semanticLocation = 5;
+    GeoLocation geoLocation = 10;
+    Status status = 11;
+}
+
+message SemanticLocation {
+    string locationName = 1;
+}
+
+enum Status {
+    SEMANTIC = 0;
+    LAST_KNOWN = 1;
+    CROWDSOURCED = 2;
+    AGGREGATED = 3;
+}
+
+message GeoLocation {
+    EncryptedReport encryptedReport = 1;
+    uint32 deviceTimeOffset = 2;
+    float accuracy = 3;
+}
+
+message EncryptedReport {
+    bytes publicKeyRandom = 1;
+    bytes encryptedLocation = 2;
+    bool isOwnReport = 3;
+}
+
+enum SpotDeviceType {
+    DEVICE_TYPE_UNKNOWN = 0;
+    DEVICE_TYPE_BEACON = 1;
+    DEVICE_TYPE_HEADPHONES = 2;
+    DEVICE_TYPE_KEYS = 3;
+    DEVICE_TYPE_WATCH = 4;
+    DEVICE_TYPE_WALLET = 5;
+    DEVICE_TYPE_BAG = 7;
+    DEVICE_TYPE_LAPTOP = 8;
+    DEVICE_TYPE_CAR = 9;
+    DEVICE_TYPE_REMOTE_CONTROL = 10;
+    DEVICE_TYPE_BADGE = 11;
+    DEVICE_TYPE_BIKE = 12;
+    DEVICE_TYPE_CAMERA = 13;
+    DEVICE_TYPE_CAT = 14;
+    DEVICE_TYPE_CHARGER = 15;
+    DEVICE_TYPE_CLOTHING = 16;
+    DEVICE_TYPE_DOG = 17;
+    DEVICE_TYPE_NOTEBOOK = 18;
+    DEVICE_TYPE_PASSPORT = 19;
+    DEVICE_TYPE_PHONE = 20;
+    DEVICE_TYPE_SPEAKER = 21;
+    DEVICE_TYPE_TABLET = 22;
+    DEVICE_TYPE_TOY = 23;
+    DEVICE_TYPE_UMBRELLA = 24;
+    DEVICE_TYPE_STYLUS = 25;
+    DEVICE_TYPE_EARBUDS = 26;
+}
+
+message AccessInformation {
+    string email = 1;
+    bool hasAccess = 2;
+    bool isOwner = 3;
+    bool thisAccount = 4;
+}
+
+message RequestMetadata {
+    Time responseTime = 1;
+}

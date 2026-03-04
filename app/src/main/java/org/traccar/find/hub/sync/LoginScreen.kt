@@ -16,7 +16,7 @@ private const val LOGIN_URL = "https://accounts.google.com/EmbeddedSetup"
 private const val COOKIE_CHECK_INTERVAL = 1000L
 
 @Composable
-fun LoginScreen(onTokenReceived: (String) -> Unit) {
+fun LoginScreen(onTokenReceived: (email: String, token: String) -> Unit) {
     val handler = remember { Handler(Looper.getMainLooper()) }
     var found = remember { mutableListOf(false) }
 
@@ -36,6 +36,8 @@ fun LoginScreen(onTokenReceived: (String) -> Unit) {
             CookieManager.getInstance().setAcceptCookie(true)
             CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
 
+            var lastEmail = ""
+
             fun checkForOAuthToken() {
                 if (found[0]) return
                 val cookies = CookieManager.getInstance().getCookie("https://accounts.google.com")
@@ -47,7 +49,7 @@ fun LoginScreen(onTokenReceived: (String) -> Unit) {
                     if (token != null) {
                         found[0] = true
                         Log.i(TAG, "OAuth token retrieved")
-                        onTokenReceived(token)
+                        onTokenReceived(lastEmail, token)
                         return
                     }
                 }
@@ -57,6 +59,12 @@ fun LoginScreen(onTokenReceived: (String) -> Unit) {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     Log.d(TAG, "Page finished: $url")
+                    url?.let { u ->
+                        val emailParam = android.net.Uri.parse(u).getQueryParameter("Email")
+                        if (!emailParam.isNullOrEmpty()) {
+                            lastEmail = emailParam
+                        }
+                    }
                     checkForOAuthToken()
                 }
             }
