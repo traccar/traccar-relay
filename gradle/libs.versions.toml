@@ -1,16 +1,16 @@
 [versions]
 agp = "9.1.0"
-coreKtx = "1.10.1"
-appcompat = "1.6.1"
-material = "1.10.0"
-composeBom = "2024.12.01"
-activityCompose = "1.9.3"
-lifecycleViewmodelCompose = "2.8.7"
+coreKtx = "1.17.0"
+appcompat = "1.7.1"
+material = "1.13.0"
+composeBom = "2026.02.01"
+activityCompose = "1.12.4"
+lifecycleViewmodelCompose = "2.10.0"
 securityCrypto = "1.1.0-alpha06"
 okhttp = "4.12.0"
-wire = "6.0.0-alpha02"
-coroutines = "1.9.0"
-bouncycastle = "1.78.1"
+wire = "6.0.0-alpha03"
+coroutines = "1.10.2"
+bouncycastle = "1.83"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
