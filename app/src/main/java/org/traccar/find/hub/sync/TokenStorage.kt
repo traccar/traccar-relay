@@ -56,10 +56,28 @@ class TokenStorage(context: Context) {
         return prefs.getString(KEY_FCM_CREDENTIALS, null)
     }
 
+    fun saveSharedKey(hex: String) {
+        prefs.edit().putString(KEY_SHARED_KEY, hex).apply()
+    }
+
+    fun getSharedKey(): String? {
+        return prefs.getString(KEY_SHARED_KEY, null)
+    }
+
+    fun saveOwnerKey(hex: String) {
+        prefs.edit().putString(KEY_OWNER_KEY, hex).apply()
+    }
+
+    fun getOwnerKey(): String? {
+        return prefs.getString(KEY_OWNER_KEY, null)
+    }
+
     companion object {
         private const val KEY_OAUTH_TOKEN = "oauth_token"
         private const val KEY_AAS_TOKEN = "aas_token"
         private const val KEY_EMAIL = "email"
         private const val KEY_FCM_CREDENTIALS = "fcm_credentials"
+        private const val KEY_SHARED_KEY = "shared_key"
+        private const val KEY_OWNER_KEY = "owner_key"
     }
 }

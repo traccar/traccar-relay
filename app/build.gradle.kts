@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.wire.runtime)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.bouncycastle)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

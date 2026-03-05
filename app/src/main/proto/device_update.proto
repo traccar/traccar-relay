@@ -79,9 +79,16 @@ message DeviceTypeInformation {
 
 message DeviceRegistration {
     DeviceTypeInformation deviceTypeInformation = 2;
+    EncryptedUserSecrets encryptedUserSecrets = 19;
     string manufacturer = 20;
     string fastPairModelId = 21;
     string model = 34;
+}
+
+message EncryptedUserSecrets {
+    bytes encryptedIdentityKey = 1;
+    int32 ownerKeyVersion = 3;
+    bytes encryptedAccountKey = 4;
 }
 
 message LocationInformation {
@@ -222,4 +229,30 @@ message Location {
     sfixed32 latitude = 1;
     sfixed32 longitude = 2;
     int32 altitude = 3;
+}
+
+message GetEidInfoForE2eeDevicesRequest {
+    int32 ownerKeyVersion = 1;
+    bool hasOwnerKeyVersion = 2;
+}
+
+message GetEidInfoForE2eeDevicesResponse {
+    EncryptedOwnerKeyAndMetadata encryptedOwnerKeyAndMetadata = 4;
+}
+
+message EncryptedOwnerKeyAndMetadata {
+    bytes encryptedOwnerKey = 1;
+    int32 ownerKeyVersion = 2;
+    string securityDomain = 3;
+}
+
+message EncryptionUnlockRequestExtras {
+    int32 operation = 1;
+    SecurityDomain securityDomain = 2;
+    string sessionId = 6;
+}
+
+message SecurityDomain {
+    string name = 1;
+    int32 unknown = 2;
 }

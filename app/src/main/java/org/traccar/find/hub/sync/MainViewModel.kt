@@ -35,8 +35,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _locatedDeviceId = MutableStateFlow<String?>(null)
     val locatedDeviceId: StateFlow<String?> = _locatedDeviceId
 
-    private val _locationResult = MutableStateFlow<String?>(null)
-    val locationResult: StateFlow<String?> = _locationResult
+    private val _locationResult = MutableStateFlow<LocationResult?>(null)
+    val locationResult: StateFlow<LocationResult?> = _locationResult
+
+    private val _needsKeySetup = MutableStateFlow(false)
+    val needsKeySetup: StateFlow<Boolean> = _needsKeySetup
 
     private var fcmCredentials: FcmCredentials? = null
     private var mcsClient: McsClient? = null
@@ -45,6 +48,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         if (tokenStorage.getToken() != null) {
+            _needsKeySetup.value = tokenStorage.getSharedKey() == null
             fetchDevices()
         }
     }
@@ -53,7 +57,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         tokenStorage.saveEmail(email)
         tokenStorage.saveToken(token)
         _token.value = token
+        _needsKeySetup.value = tokenStorage.getSharedKey() == null
         exchangeTokenAndFetchDevices(token)
+    }
+
+    fun onSharedKeyReceived(sharedKey: ByteArray) {
+        val hex = sharedKey.joinToString("") { "%02x".format(it) }
+        tokenStorage.saveSharedKey(hex)
+        _needsKeySetup.value = false
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                fetchAndDecryptOwnerKey(sharedKey)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching owner key", e)
+                _error.value = "Owner key error: ${e.message}"
+            }
+        }
+    }
+
+    private fun fetchAndDecryptOwnerKey(sharedKey: ByteArray) {
+        val androidId = Settings.Secure.getString(
+            getApplication<Application>().contentResolver,
+            Settings.Secure.ANDROID_ID
+        )
+        val email = tokenStorage.getEmail() ?: ""
+        val aasToken = tokenStorage.getAasToken() ?: throw Exception("No AAS token")
+
+        val oauthResult = GoogleAuthClient.performOAuth(email, aasToken, androidId, "spot", "com.google.android.gms")
+        val spotToken = oauthResult["Auth"] ?: throw Exception("Failed to get Spot token: ${oauthResult["Error"]}")
+
+        val encryptedOwnerKey = SpotApiClient.getEncryptedOwnerKey(spotToken)
+        val ownerKey = LocationDecryptor.decryptOwnerKey(sharedKey, encryptedOwnerKey)
+        val hex = ownerKey.joinToString("") { "%02x".format(it) }
+        tokenStorage.saveOwnerKey(hex)
     }
 
     fun fetchDevices() {
@@ -206,39 +243,93 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val locationInfo = deviceUpdate.deviceMetadata?.information?.locationInformation
         val reports = locationInfo?.reports?.recentLocationAndNetworkLocations
 
-        val sb = StringBuilder()
-        sb.appendLine("Device: $deviceName")
+        val ownerKeyHex = tokenStorage.getOwnerKey()
+        val ownerKey = ownerKeyHex?.chunked(2)?.map { it.toInt(16).toByte() }?.toByteArray()
 
-        if (reports != null) {
-            val recentTime = reports.recentLocationTimestamp
-            if (recentTime != null) {
-                sb.appendLine("Recent: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(java.util.Date(recentTime.seconds.toLong() * 1000))}")
-            }
+        val encryptedEik = deviceUpdate.deviceMetadata?.information?.deviceRegistration
+            ?.encryptedUserSecrets?.encryptedIdentityKey?.toByteArray()
 
-            val recentLoc = reports.recentLocation
-            if (recentLoc != null) {
-                sb.appendLine("Status: ${recentLoc.status}")
-                recentLoc.geoLocation?.let { geo ->
-                    sb.appendLine("Accuracy: ${geo.accuracy}m")
-                }
-                recentLoc.semanticLocation?.let { sem ->
-                    sb.appendLine("Location: ${sem.locationName}")
-                }
+        var identityKey: ByteArray? = null
+        if (ownerKey != null && encryptedEik != null) {
+            try {
+                identityKey = LocationDecryptor.decryptEik(ownerKey, encryptedEik)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error decrypting EIK", e)
             }
-
-            val networkCount = reports.networkLocations.size
-            if (networkCount > 0) {
-                sb.appendLine("Network locations: $networkCount")
-            }
-        } else {
-            sb.appendLine("No location data")
         }
 
-        _locationResult.value = sb.toString()
+        val locations = mutableListOf<LocationEntry>()
+
+        if (reports != null) {
+            val recentLoc = reports.recentLocation
+            val recentTime = reports.recentLocationTimestamp
+            if (recentLoc != null) {
+                val entry = buildLocationEntry(recentLoc, recentTime, identityKey, "Recent")
+                locations.add(entry)
+            }
+
+            reports.networkLocations.forEachIndexed { index, loc ->
+                val time = reports.networkLocationTimestamps.getOrNull(index)
+                val entry = buildLocationEntry(loc, time, identityKey, "Network ${index + 1}")
+                locations.add(entry)
+            }
+        }
+
+        _locationResult.value = LocationResult(deviceName, locations)
         _locatedDeviceId.value = pendingDeviceId
         _locatingDevice.value = null
         pendingRequestUuid = null
         pendingDeviceId = null
+    }
+
+    private fun buildLocationEntry(
+        report: org.traccar.find.hub.sync.proto.LocationReport,
+        time: org.traccar.find.hub.sync.proto.Time?,
+        identityKey: ByteArray?,
+        label: String,
+    ): LocationEntry {
+        val timestamp = time?.let {
+            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
+                .format(java.util.Date(it.seconds.toLong() * 1000))
+        }
+        val status = report.status?.name
+        val accuracy = report.geoLocation?.accuracy
+        val semanticLocation = report.semanticLocation?.locationName
+
+        var latitude: Double? = null
+        var longitude: Double? = null
+        var altitude: Int? = null
+
+        val geo = report.geoLocation?.encryptedReport
+        if (geo != null && identityKey != null) {
+            try {
+                val encLoc = geo.encryptedLocation?.toByteArray()
+                val pubKeyRandom = geo.publicKeyRandom?.toByteArray()
+                val deviceTimeOffset = report.geoLocation?.deviceTimeOffset?.toLong() ?: 0L
+
+                if (encLoc != null) {
+                    val decrypted = LocationDecryptor.decryptLocation(
+                        identityKey, encLoc, pubKeyRandom, deviceTimeOffset
+                    )
+                    latitude = decrypted.latitude
+                    longitude = decrypted.longitude
+                    altitude = decrypted.altitude
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error decrypting location for $label", e)
+            }
+        }
+
+        return LocationEntry(
+            label = label,
+            timestamp = timestamp,
+            status = status,
+            accuracy = accuracy,
+            latitude = latitude,
+            longitude = longitude,
+            altitude = altitude,
+            semanticLocation = semanticLocation,
+        )
     }
 
     fun requestLocation(device: Device) {
@@ -269,7 +360,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 NovaApiClient.executeAction(admToken, payload)
             } catch (e: Exception) {
                 Log.e(TAG, "Error requesting location", e)
-                _locationResult.value = "Error: ${e.message}"
+                _locationResult.value = LocationResult("Error", listOf(LocationEntry(label = e.message ?: "Unknown error")))
                 _locatingDevice.value = null
             }
         }
@@ -285,3 +376,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         private const val TAG = "MainViewModel"
     }
 }
+
+data class LocationEntry(
+    val label: String,
+    val timestamp: String? = null,
+    val status: String? = null,
+    val accuracy: Float? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val altitude: Int? = null,
+    val semanticLocation: String? = null,
+)
+
+data class LocationResult(
+    val deviceName: String,
+    val locations: List<LocationEntry>,
+)

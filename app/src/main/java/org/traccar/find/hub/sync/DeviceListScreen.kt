@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -19,6 +20,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -63,10 +69,7 @@ fun DeviceListScreen(viewModel: MainViewModel) {
                                     )
                                 }
                                 if (locationResult != null && locatedDeviceId == device.id) {
-                                    Text(
-                                        locationResult!!,
-                                        style = MaterialTheme.typography.bodySmall,
-                                    )
+                                    LocationResultView(locationResult!!)
                                 }
                             }
                         },
@@ -82,6 +85,58 @@ fun DeviceListScreen(viewModel: MainViewModel) {
                     )
                     HorizontalDivider()
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LocationResultView(result: LocationResult) {
+    val uriHandler = LocalUriHandler.current
+
+    Column(modifier = Modifier.padding(top = 4.dp)) {
+        for (entry in result.locations) {
+            Text(
+                text = entry.label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            entry.timestamp?.let {
+                Text("Time: $it", style = MaterialTheme.typography.bodySmall)
+            }
+            entry.status?.let {
+                Text("Status: $it", style = MaterialTheme.typography.bodySmall)
+            }
+            entry.accuracy?.let {
+                Text("Accuracy: ${it}m", style = MaterialTheme.typography.bodySmall)
+            }
+            entry.altitude?.let {
+                if (it != 0) Text("Altitude: ${it}m", style = MaterialTheme.typography.bodySmall)
+            }
+            entry.semanticLocation?.let {
+                if (it.isNotEmpty()) Text("Location: $it", style = MaterialTheme.typography.bodySmall)
+            }
+            if (entry.latitude != null && entry.longitude != null) {
+                val url = "https://maps.google.com/?q=${entry.latitude},${entry.longitude}"
+                val coordText = "%.6f, %.6f".format(entry.latitude, entry.longitude)
+                val annotatedString = buildAnnotatedString {
+                    pushStringAnnotation("URL", url)
+                    withStyle(SpanStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.Underline,
+                    )) {
+                        append(coordText)
+                    }
+                    pop()
+                }
+                ClickableText(
+                    text = annotatedString,
+                    style = MaterialTheme.typography.bodySmall,
+                    onClick = { offset ->
+                        annotatedString.getStringAnnotations("URL", offset, offset)
+                            .firstOrNull()?.let { uriHandler.openUri(it.item) }
+                    }
+                )
             }
         }
     }
