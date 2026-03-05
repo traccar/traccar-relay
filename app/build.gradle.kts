@@ -19,8 +19,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
+}
 
     buildTypes {
         release {
@@ -65,7 +64,4 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.bouncycastle)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }
