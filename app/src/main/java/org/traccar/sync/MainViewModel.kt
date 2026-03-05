@@ -87,7 +87,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         tokenStorage.saveOwnerKey(hex)
     }
 
-    fun fetchDevices() {
+    private fun fetchDevices() {
         val oauthToken = tokenStorage.getToken() ?: return
         exchangeTokenAndFetchDevices(oauthToken)
     }

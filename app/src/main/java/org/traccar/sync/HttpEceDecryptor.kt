@@ -110,7 +110,7 @@ object HttpEceDecryptor {
         return KeyFactory.getInstance("EC").generatePublic(keySpec)
     }
 
-    fun base64Decode(input: String): ByteArray {
+    private fun base64Decode(input: String): ByteArray {
         val padded = input + "========".substring(0, (4 - input.length % 4) % 4)
         return Base64.decode(padded, Base64.URL_SAFE)
     }

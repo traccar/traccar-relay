@@ -31,10 +31,6 @@ class TokenStorage(context: Context) {
         return prefs.getString(KEY_OAUTH_TOKEN, null)
     }
 
-    fun clearToken() {
-        prefs.edit { remove(KEY_OAUTH_TOKEN) }
-    }
-
     fun saveAasToken(token: String) {
         prefs.edit { putString(KEY_AAS_TOKEN, token) }
     }
