@@ -132,7 +132,7 @@ object LocationDecryptor {
         val tag = encryptedLocation.copyOfRange(encryptedLocation.size - 16, encryptedLocation.size)
         val input = ciphertext + tag
 
-        val eax = EAXBlockCipher(AESEngine())
+        val eax = EAXBlockCipher(AESEngine.newInstance())
         val params = AEADParameters(KeyParameter(derivedKey), 128, nonce)
         eax.init(false, params)
         val output = ByteArray(eax.getOutputSize(input.size))

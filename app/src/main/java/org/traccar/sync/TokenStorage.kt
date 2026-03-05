@@ -2,26 +2,29 @@ package org.traccar.sync
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
 
 class TokenStorage(context: Context) {
 
     private val prefs: SharedPreferences
 
     init {
-        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
         prefs = EncryptedSharedPreferences.create(
-            "secure_prefs",
-            masterKeyAlias,
             context,
+            "secure_prefs",
+            masterKey,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
     }
 
     fun saveToken(token: String) {
-        prefs.edit().putString(KEY_OAUTH_TOKEN, token).apply()
+        prefs.edit { putString(KEY_OAUTH_TOKEN, token) }
     }
 
     fun getToken(): String? {
@@ -29,11 +32,11 @@ class TokenStorage(context: Context) {
     }
 
     fun clearToken() {
-        prefs.edit().remove(KEY_OAUTH_TOKEN).apply()
+        prefs.edit { remove(KEY_OAUTH_TOKEN) }
     }
 
     fun saveAasToken(token: String) {
-        prefs.edit().putString(KEY_AAS_TOKEN, token).apply()
+        prefs.edit { putString(KEY_AAS_TOKEN, token) }
     }
 
     fun getAasToken(): String? {
@@ -41,7 +44,7 @@ class TokenStorage(context: Context) {
     }
 
     fun saveEmail(email: String) {
-        prefs.edit().putString(KEY_EMAIL, email).apply()
+        prefs.edit { putString(KEY_EMAIL, email) }
     }
 
     fun getEmail(): String? {
@@ -49,7 +52,7 @@ class TokenStorage(context: Context) {
     }
 
     fun saveFcmCredentials(json: String) {
-        prefs.edit().putString(KEY_FCM_CREDENTIALS, json).apply()
+        prefs.edit { putString(KEY_FCM_CREDENTIALS, json) }
     }
 
     fun getFcmCredentials(): String? {
@@ -57,7 +60,7 @@ class TokenStorage(context: Context) {
     }
 
     fun saveSharedKey(hex: String) {
-        prefs.edit().putString(KEY_SHARED_KEY, hex).apply()
+        prefs.edit { putString(KEY_SHARED_KEY, hex) }
     }
 
     fun getSharedKey(): String? {
@@ -65,7 +68,7 @@ class TokenStorage(context: Context) {
     }
 
     fun saveOwnerKey(hex: String) {
-        prefs.edit().putString(KEY_OWNER_KEY, hex).apply()
+        prefs.edit { putString(KEY_OWNER_KEY, hex) }
     }
 
     fun getOwnerKey(): String? {

@@ -3,6 +3,7 @@ package org.traccar.sync
 import android.os.Handler
 import android.os.Looper
 import android.webkit.CookieManager
+import androidx.core.net.toUri
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
@@ -16,7 +17,7 @@ private const val COOKIE_CHECK_INTERVAL = 1000L
 @Composable
 fun LoginScreen(onTokenReceived: (email: String, token: String) -> Unit) {
     val handler = remember { Handler(Looper.getMainLooper()) }
-    var found = remember { mutableListOf(false) }
+    val found = remember { mutableListOf(false) }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -56,7 +57,7 @@ fun LoginScreen(onTokenReceived: (email: String, token: String) -> Unit) {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     url?.let { u ->
-                        val emailParam = android.net.Uri.parse(u).getQueryParameter("Email")
+                        val emailParam = u.toUri().getQueryParameter("Email")
                         if (!emailParam.isNullOrEmpty()) {
                             lastEmail = emailParam
                         }
