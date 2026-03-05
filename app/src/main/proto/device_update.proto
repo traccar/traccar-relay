@@ -167,3 +167,59 @@ message AccessInformation {
 message RequestMetadata {
     Time responseTime = 1;
 }
+
+message ExecuteActionRequest {
+    ExecuteActionScope scope = 1;
+    ExecuteActionType action = 2;
+    ExecuteActionRequestMetadata requestMetadata = 3;
+}
+
+message ExecuteActionScope {
+    DeviceType type = 2;
+    ExecuteActionDeviceIdentifier device = 3;
+}
+
+message ExecuteActionDeviceIdentifier {
+    CanonicId canonicId = 1;
+}
+
+message ExecuteActionType {
+    ExecuteActionLocateTrackerType locateTracker = 30;
+}
+
+message ExecuteActionLocateTrackerType {
+    Time lastHighTrafficEnablingTime = 2;
+    SpotContributorType contributorType = 3;
+}
+
+enum SpotContributorType {
+    FMDN_DISABLED_DEFAULT = 0;
+    FMDN_HIGH_TRAFFIC = 1;
+    FMDN_ALL_LOCATIONS = 2;
+    FMDN_CONTRIBUTOR_HIGH_TRAFFIC = 3;
+    FMDN_CONTRIBUTOR_ALL_LOCATIONS = 4;
+}
+
+message ExecuteActionRequestMetadata {
+    DeviceType type = 1;
+    string requestUuid = 2;
+    string fmdClientUuid = 3;
+    GcmCloudMessagingIdProtobuf gcmRegistrationId = 4;
+    bool unknown = 6;
+}
+
+message GcmCloudMessagingIdProtobuf {
+    string id = 1;
+}
+
+message DeviceUpdate {
+    ExecuteActionRequestMetadata fcmMetadata = 1;
+    RequestMetadata requestMetadata = 2;
+    DeviceMetadata deviceMetadata = 3;
+}
+
+message Location {
+    sfixed32 latitude = 1;
+    sfixed32 longitude = 2;
+    int32 altitude = 3;
+}

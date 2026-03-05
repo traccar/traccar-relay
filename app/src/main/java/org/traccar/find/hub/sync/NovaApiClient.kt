@@ -4,11 +4,21 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.traccar.find.hub.sync.proto.CanonicId
 import org.traccar.find.hub.sync.proto.DeviceType
 import org.traccar.find.hub.sync.proto.DevicesList
 import org.traccar.find.hub.sync.proto.DevicesListRequest
 import org.traccar.find.hub.sync.proto.DevicesListRequestPayload
+import org.traccar.find.hub.sync.proto.ExecuteActionDeviceIdentifier
+import org.traccar.find.hub.sync.proto.ExecuteActionLocateTrackerType
+import org.traccar.find.hub.sync.proto.ExecuteActionRequest
+import org.traccar.find.hub.sync.proto.ExecuteActionRequestMetadata
+import org.traccar.find.hub.sync.proto.ExecuteActionScope
+import org.traccar.find.hub.sync.proto.ExecuteActionType
+import org.traccar.find.hub.sync.proto.GcmCloudMessagingIdProtobuf
 import org.traccar.find.hub.sync.proto.IdentifierInformationType
+import org.traccar.find.hub.sync.proto.SpotContributorType
+import org.traccar.find.hub.sync.proto.Time
 import java.util.UUID
 
 data class Device(val name: String, val id: String)
@@ -57,5 +67,47 @@ object NovaApiClient {
         }
 
         return result
+    }
+
+    fun executeAction(admToken: String, payload: ByteArray) {
+        val contentType = "application/x-www-form-urlencoded; charset=UTF-8".toMediaType()
+        val request = Request.Builder()
+            .url(BASE_URL + "nbe_execute_action")
+            .post(payload.toRequestBody(contentType))
+            .header("Authorization", "Bearer $admToken")
+            .header("Accept-Language", "en-US")
+            .header("User-Agent", USER_AGENT)
+            .build()
+
+        client.newCall(request).execute()
+    }
+
+    fun buildLocationRequest(
+        canonicDeviceId: String,
+        fcmToken: String,
+        requestUuid: String = UUID.randomUUID().toString(),
+    ): Pair<ByteArray, String> {
+        val request = ExecuteActionRequest(
+            scope = ExecuteActionScope(
+                type = DeviceType.SPOT_DEVICE,
+                device = ExecuteActionDeviceIdentifier(
+                    canonicId = CanonicId(id = canonicDeviceId)
+                ),
+            ),
+            action = ExecuteActionType(
+                locateTracker = ExecuteActionLocateTrackerType(
+                    lastHighTrafficEnablingTime = Time(seconds = 1732120060, nanos = 0),
+                    contributorType = SpotContributorType.FMDN_ALL_LOCATIONS,
+                ),
+            ),
+            requestMetadata = ExecuteActionRequestMetadata(
+                type = DeviceType.SPOT_DEVICE,
+                requestUuid = requestUuid,
+                fmdClientUuid = UUID.randomUUID().toString(),
+                gcmRegistrationId = GcmCloudMessagingIdProtobuf(id = fcmToken),
+                unknown = true,
+            ),
+        )
+        return Pair(request.encode(), requestUuid)
     }
 }

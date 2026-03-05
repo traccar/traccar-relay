@@ -2,7 +2,6 @@ package org.traccar.find.hub.sync
 
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -11,7 +10,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.viewinterop.AndroidView
 
-private const val TAG = "LoginScreen"
 private const val LOGIN_URL = "https://accounts.google.com/EmbeddedSetup"
 private const val COOKIE_CHECK_INTERVAL = 1000L
 
@@ -48,7 +46,6 @@ fun LoginScreen(onTokenReceived: (email: String, token: String) -> Unit) {
                         ?.get(1)
                     if (token != null) {
                         found[0] = true
-                        Log.i(TAG, "OAuth token retrieved")
                         onTokenReceived(lastEmail, token)
                         return
                     }
@@ -58,7 +55,6 @@ fun LoginScreen(onTokenReceived: (email: String, token: String) -> Unit) {
 
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
-                    Log.d(TAG, "Page finished: $url")
                     url?.let { u ->
                         val emailParam = android.net.Uri.parse(u).getQueryParameter("Email")
                         if (!emailParam.isNullOrEmpty()) {

@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +26,9 @@ fun DeviceListScreen(viewModel: MainViewModel) {
     val devices by viewModel.devices.collectAsState()
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
+    val locatingDevice by viewModel.locatingDevice.collectAsState()
+    val locatedDeviceId by viewModel.locatedDeviceId.collectAsState()
+    val locationResult by viewModel.locationResult.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         if (loading) {
@@ -47,7 +52,33 @@ fun DeviceListScreen(viewModel: MainViewModel) {
                 items(devices) { device ->
                     ListItem(
                         headlineContent = { Text(device.name) },
-                        supportingContent = { Text(device.id) }
+                        supportingContent = {
+                            Column {
+                                Text(device.id)
+                                if (locatingDevice == device.id) {
+                                    Text(
+                                        "Locating...",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                if (locationResult != null && locatedDeviceId == device.id) {
+                                    Text(
+                                        locationResult!!,
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                            }
+                        },
+                        trailingContent = {
+                            if (locatingDevice == device.id) {
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            } else {
+                                IconButton(onClick = { viewModel.requestLocation(device) }) {
+                                    Text("\uD83D\uDCCD")
+                                }
+                            }
+                        }
                     )
                     HorizontalDivider()
                 }

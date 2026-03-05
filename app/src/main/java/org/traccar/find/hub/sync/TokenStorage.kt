@@ -48,9 +48,18 @@ class TokenStorage(context: Context) {
         return prefs.getString(KEY_EMAIL, null)
     }
 
+    fun saveFcmCredentials(json: String) {
+        prefs.edit().putString(KEY_FCM_CREDENTIALS, json).apply()
+    }
+
+    fun getFcmCredentials(): String? {
+        return prefs.getString(KEY_FCM_CREDENTIALS, null)
+    }
+
     companion object {
         private const val KEY_OAUTH_TOKEN = "oauth_token"
         private const val KEY_AAS_TOKEN = "aas_token"
         private const val KEY_EMAIL = "email"
+        private const val KEY_FCM_CREDENTIALS = "fcm_credentials"
     }
 }
