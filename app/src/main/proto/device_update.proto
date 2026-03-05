@@ -192,6 +192,19 @@ message ExecuteActionDeviceIdentifier {
 
 message ExecuteActionType {
     ExecuteActionLocateTrackerType locateTracker = 30;
+    ExecuteActionSoundType startSound = 31;
+    ExecuteActionSoundType stopSound = 32;
+}
+
+message ExecuteActionSoundType {
+    DeviceComponent component = 1;
+}
+
+enum DeviceComponent {
+    DEVICE_COMPONENT_UNSPECIFIED = 0;
+    DEVICE_COMPONENT_RIGHT = 1;
+    DEVICE_COMPONENT_LEFT = 2;
+    DEVICE_COMPONENT_CASE = 3;
 }
 
 message ExecuteActionLocateTrackerType {

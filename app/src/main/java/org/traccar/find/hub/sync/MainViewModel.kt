@@ -41,6 +41,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _needsKeySetup = MutableStateFlow(false)
     val needsKeySetup: StateFlow<Boolean> = _needsKeySetup
 
+    private val _ringingDevice = MutableStateFlow<String?>(null)
+    val ringingDevice: StateFlow<String?> = _ringingDevice
+
     private var fcmCredentials: FcmCredentials? = null
     private var mcsClient: McsClient? = null
     private var pendingRequestUuid: String? = null
@@ -362,6 +365,47 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 Log.e(TAG, "Error requesting location", e)
                 _locationResult.value = LocationResult("Error", listOf(LocationEntry(label = e.message ?: "Unknown error")))
                 _locatingDevice.value = null
+            }
+        }
+    }
+
+    fun playSound(device: Device) {
+        sendSoundRequest(device, start = true)
+    }
+
+    fun stopSound(device: Device) {
+        sendSoundRequest(device, start = false)
+    }
+
+    private fun sendSoundRequest(device: Device, start: Boolean) {
+        val creds = fcmCredentials ?: return
+
+        if (start) {
+            _ringingDevice.value = device.id
+        } else {
+            _ringingDevice.value = null
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val androidId = Settings.Secure.getString(
+                    getApplication<Application>().contentResolver,
+                    Settings.Secure.ANDROID_ID
+                )
+
+                val email = tokenStorage.getEmail() ?: ""
+                val aasToken = tokenStorage.getAasToken()
+                    ?: throw Exception("No AAS token")
+
+                val oauthResult = GoogleAuthClient.performOAuth(email, aasToken, androidId, "android_device_manager")
+                val admToken = oauthResult["Auth"]
+                    ?: throw Exception("Failed to get ADM token: ${oauthResult["Error"]}")
+
+                val payload = NovaApiClient.buildSoundRequest(device.id, creds.fcmToken, start)
+                NovaApiClient.executeAction(admToken, payload)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error sending sound request", e)
+                _ringingDevice.value = null
             }
         }
     }

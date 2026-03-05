@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,6 +36,7 @@ fun DeviceListScreen(viewModel: MainViewModel) {
     val locatingDevice by viewModel.locatingDevice.collectAsState()
     val locatedDeviceId by viewModel.locatedDeviceId.collectAsState()
     val locationResult by viewModel.locationResult.collectAsState()
+    val ringingDevice by viewModel.ringingDevice.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         if (loading) {
@@ -74,11 +76,22 @@ fun DeviceListScreen(viewModel: MainViewModel) {
                             }
                         },
                         trailingContent = {
-                            if (locatingDevice == device.id) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                            } else {
-                                IconButton(onClick = { viewModel.requestLocation(device) }) {
-                                    Text("\uD83D\uDCCD")
+                            Row {
+                                if (ringingDevice == device.id) {
+                                    IconButton(onClick = { viewModel.stopSound(device) }) {
+                                        Text("\uD83D\uDD15")
+                                    }
+                                } else {
+                                    IconButton(onClick = { viewModel.playSound(device) }) {
+                                        Text("\uD83D\uDD14")
+                                    }
+                                }
+                                if (locatingDevice == device.id) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                } else {
+                                    IconButton(onClick = { viewModel.requestLocation(device) }) {
+                                        Text("\uD83D\uDCCD")
+                                    }
                                 }
                             }
                         }

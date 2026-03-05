@@ -10,7 +10,9 @@ import org.traccar.find.hub.sync.proto.DevicesList
 import org.traccar.find.hub.sync.proto.DevicesListRequest
 import org.traccar.find.hub.sync.proto.DevicesListRequestPayload
 import org.traccar.find.hub.sync.proto.ExecuteActionDeviceIdentifier
+import org.traccar.find.hub.sync.proto.DeviceComponent
 import org.traccar.find.hub.sync.proto.ExecuteActionLocateTrackerType
+import org.traccar.find.hub.sync.proto.ExecuteActionSoundType
 import org.traccar.find.hub.sync.proto.ExecuteActionRequest
 import org.traccar.find.hub.sync.proto.ExecuteActionRequestMetadata
 import org.traccar.find.hub.sync.proto.ExecuteActionScope
@@ -109,5 +111,35 @@ object NovaApiClient {
             ),
         )
         return Pair(request.encode(), requestUuid)
+    }
+
+    fun buildSoundRequest(
+        canonicDeviceId: String,
+        fcmToken: String,
+        start: Boolean,
+    ): ByteArray {
+        val soundType = ExecuteActionSoundType(
+            component = DeviceComponent.DEVICE_COMPONENT_UNSPECIFIED,
+        )
+        val request = ExecuteActionRequest(
+            scope = ExecuteActionScope(
+                type = DeviceType.SPOT_DEVICE,
+                device = ExecuteActionDeviceIdentifier(
+                    canonicId = CanonicId(id = canonicDeviceId)
+                ),
+            ),
+            action = ExecuteActionType(
+                startSound = if (start) soundType else null,
+                stopSound = if (!start) soundType else null,
+            ),
+            requestMetadata = ExecuteActionRequestMetadata(
+                type = DeviceType.SPOT_DEVICE,
+                requestUuid = UUID.randomUUID().toString(),
+                fmdClientUuid = UUID.randomUUID().toString(),
+                gcmRegistrationId = GcmCloudMessagingIdProtobuf(id = fcmToken),
+                unknown = true,
+            ),
+        )
+        return request.encode()
     }
 }
