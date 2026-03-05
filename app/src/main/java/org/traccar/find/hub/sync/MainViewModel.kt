@@ -65,18 +65,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onSharedKeyReceived(sharedKey: ByteArray) {
-        val hex = sharedKey.joinToString("") { "%02x".format(it) }
-        tokenStorage.saveSharedKey(hex)
+        tokenStorage.saveSharedKey(sharedKey.joinToString("") { "%02x".format(it) })
         _needsKeySetup.value = false
-
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                fetchAndDecryptOwnerKey(sharedKey)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching owner key", e)
-                _error.value = "Owner key error: ${e.message}"
-            }
-        }
+        exchangeTokenAndFetchDevices(tokenStorage.getToken()!!, sharedKey)
     }
 
     private fun fetchAndDecryptOwnerKey(sharedKey: ByteArray) {
@@ -101,7 +92,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         exchangeTokenAndFetchDevices(oauthToken)
     }
 
-    private fun exchangeTokenAndFetchDevices(oauthToken: String) {
+    private fun exchangeTokenAndFetchDevices(oauthToken: String, sharedKey: ByteArray? = null) {
         viewModelScope.launch(Dispatchers.IO) {
             _loading.value = true
             _error.value = null
@@ -120,6 +111,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         ?: throw Exception("Failed to get AAS token: ${exchangeResult["Error"]}")
                     tokenStorage.saveAasToken(aasToken)
                     exchangeResult["Email"]?.let { tokenStorage.saveEmail(it) }
+                }
+
+                if (sharedKey != null && tokenStorage.getOwnerKey() == null) {
+                    try {
+                        fetchAndDecryptOwnerKey(sharedKey)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error fetching owner key", e)
+                    }
                 }
 
                 val currentEmail = tokenStorage.getEmail() ?: email
