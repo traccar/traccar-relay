@@ -1,4 +1,4 @@
-package org.traccar.find.hub.sync
+package org.traccar.sync
 
 import org.bouncycastle.crypto.engines.AESEngine
 import org.bouncycastle.crypto.modes.EAXBlockCipher
@@ -7,7 +7,7 @@ import org.bouncycastle.crypto.params.KeyParameter
 import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.math.ec.ECPoint
-import org.traccar.find.hub.sync.proto.Location
+import org.traccar.sync.proto.Location
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.security.MessageDigest

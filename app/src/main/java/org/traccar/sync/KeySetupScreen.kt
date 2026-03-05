@@ -1,4 +1,4 @@
-package org.traccar.find.hub.sync
+package org.traccar.sync
 
 import android.util.Base64
 import android.util.Log
@@ -9,8 +9,8 @@ import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.viewinterop.AndroidView
 import org.json.JSONObject
-import org.traccar.find.hub.sync.proto.EncryptionUnlockRequestExtras
-import org.traccar.find.hub.sync.proto.SecurityDomain
+import org.traccar.sync.proto.EncryptionUnlockRequestExtras
+import org.traccar.sync.proto.SecurityDomain
 import java.util.UUID
 
 private const val TAG = "KeySetupScreen"

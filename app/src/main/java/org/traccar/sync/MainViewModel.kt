@@ -1,4 +1,4 @@
-package org.traccar.find.hub.sync
+package org.traccar.sync
 
 import android.app.Application
 import android.provider.Settings
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import org.traccar.find.hub.sync.proto.DeviceUpdate
+import org.traccar.sync.proto.DeviceUpdate
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -203,7 +203,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun handlePushMessage(message: org.traccar.find.hub.sync.proto.mcs.DataMessageStanza) {
+    private fun handlePushMessage(message: org.traccar.sync.proto.mcs.DataMessageStanza) {
         val creds = fcmCredentials ?: return
 
         try {
@@ -285,8 +285,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun buildLocationEntry(
-        report: org.traccar.find.hub.sync.proto.LocationReport,
-        time: org.traccar.find.hub.sync.proto.Time?,
+        report: org.traccar.sync.proto.LocationReport,
+        time: org.traccar.sync.proto.Time?,
         identityKey: ByteArray?,
         label: String,
     ): LocationEntry {

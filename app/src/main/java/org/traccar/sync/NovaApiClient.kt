@@ -1,26 +1,26 @@
-package org.traccar.find.hub.sync
+package org.traccar.sync
 
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.traccar.find.hub.sync.proto.CanonicId
-import org.traccar.find.hub.sync.proto.DeviceType
-import org.traccar.find.hub.sync.proto.DevicesList
-import org.traccar.find.hub.sync.proto.DevicesListRequest
-import org.traccar.find.hub.sync.proto.DevicesListRequestPayload
-import org.traccar.find.hub.sync.proto.ExecuteActionDeviceIdentifier
-import org.traccar.find.hub.sync.proto.DeviceComponent
-import org.traccar.find.hub.sync.proto.ExecuteActionLocateTrackerType
-import org.traccar.find.hub.sync.proto.ExecuteActionSoundType
-import org.traccar.find.hub.sync.proto.ExecuteActionRequest
-import org.traccar.find.hub.sync.proto.ExecuteActionRequestMetadata
-import org.traccar.find.hub.sync.proto.ExecuteActionScope
-import org.traccar.find.hub.sync.proto.ExecuteActionType
-import org.traccar.find.hub.sync.proto.GcmCloudMessagingIdProtobuf
-import org.traccar.find.hub.sync.proto.IdentifierInformationType
-import org.traccar.find.hub.sync.proto.SpotContributorType
-import org.traccar.find.hub.sync.proto.Time
+import org.traccar.sync.proto.CanonicId
+import org.traccar.sync.proto.DeviceType
+import org.traccar.sync.proto.DevicesList
+import org.traccar.sync.proto.DevicesListRequest
+import org.traccar.sync.proto.DevicesListRequestPayload
+import org.traccar.sync.proto.ExecuteActionDeviceIdentifier
+import org.traccar.sync.proto.DeviceComponent
+import org.traccar.sync.proto.ExecuteActionLocateTrackerType
+import org.traccar.sync.proto.ExecuteActionSoundType
+import org.traccar.sync.proto.ExecuteActionRequest
+import org.traccar.sync.proto.ExecuteActionRequestMetadata
+import org.traccar.sync.proto.ExecuteActionScope
+import org.traccar.sync.proto.ExecuteActionType
+import org.traccar.sync.proto.GcmCloudMessagingIdProtobuf
+import org.traccar.sync.proto.IdentifierInformationType
+import org.traccar.sync.proto.SpotContributorType
+import org.traccar.sync.proto.Time
 import java.util.UUID
 
 data class Device(val name: String, val id: String)

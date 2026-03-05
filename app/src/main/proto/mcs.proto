@@ -2,7 +2,7 @@ syntax = "proto2";
 
 package mcs_proto;
 
-option java_package = "org.traccar.find.hub.sync.proto.mcs";
+option java_package = "org.traccar.sync.proto.mcs";
 
 message HeartbeatPing {
   optional int32 stream_id = 1;

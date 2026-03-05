@@ -1,4 +1,4 @@
-package org.traccar.find.hub.sync
+package org.traccar.sync
 
 import okhttp3.FormBody
 import okhttp3.OkHttpClient

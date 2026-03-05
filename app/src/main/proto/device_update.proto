@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package findhubsync;
 
-option java_package = "org.traccar.find.hub.sync.proto";
+option java_package = "org.traccar.sync.proto";
 
 message Time {
     uint32 seconds = 1;

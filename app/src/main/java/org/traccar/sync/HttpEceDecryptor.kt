@@ -1,4 +1,4 @@
-package org.traccar.find.hub.sync
+package org.traccar.sync
 
 import android.util.Base64
 import java.nio.ByteBuffer

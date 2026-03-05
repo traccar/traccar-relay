@@ -1,4 +1,4 @@
-package org.traccar.find.hub.sync
+package org.traccar.sync
 
 import android.util.Base64
 import okhttp3.FormBody
@@ -7,10 +7,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import org.traccar.find.hub.sync.proto.checkin.AndroidCheckinProto
-import org.traccar.find.hub.sync.proto.checkin.AndroidCheckinRequest
-import org.traccar.find.hub.sync.proto.checkin.AndroidCheckinResponse
-import org.traccar.find.hub.sync.proto.checkin.ChromeBuildProto
+import org.traccar.sync.proto.checkin.AndroidCheckinProto
+import org.traccar.sync.proto.checkin.AndroidCheckinRequest
+import org.traccar.sync.proto.checkin.AndroidCheckinResponse
+import org.traccar.sync.proto.checkin.ChromeBuildProto
 import java.security.KeyPairGenerator
 import java.security.SecureRandom
 import java.security.interfaces.ECPrivateKey
@@ -85,7 +85,7 @@ object FcmRegistrationClient {
         )
 
         val checkin = AndroidCheckinProto(
-            type = org.traccar.find.hub.sync.proto.checkin.DeviceType.DEVICE_CHROME_BROWSER,
+            type = org.traccar.sync.proto.checkin.DeviceType.DEVICE_CHROME_BROWSER,
             chrome_build = chrome,
         )
 

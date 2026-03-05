@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "org.traccar.find.hub.sync"
+    namespace = "org.traccar.sync"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -13,7 +13,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "org.traccar.find.hub.sync"
+        applicationId = "org.traccar.sync"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

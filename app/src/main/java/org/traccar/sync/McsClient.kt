@@ -1,15 +1,15 @@
-package org.traccar.find.hub.sync
+package org.traccar.sync
 
 import android.util.Log
-import org.traccar.find.hub.sync.proto.mcs.Close
-import org.traccar.find.hub.sync.proto.mcs.DataMessageStanza
-import org.traccar.find.hub.sync.proto.mcs.HeartbeatAck
-import org.traccar.find.hub.sync.proto.mcs.HeartbeatPing
-import org.traccar.find.hub.sync.proto.mcs.IqStanza
-import org.traccar.find.hub.sync.proto.mcs.HeartbeatStat
-import org.traccar.find.hub.sync.proto.mcs.LoginRequest
-import org.traccar.find.hub.sync.proto.mcs.LoginResponse
-import org.traccar.find.hub.sync.proto.mcs.Setting
+import org.traccar.sync.proto.mcs.Close
+import org.traccar.sync.proto.mcs.DataMessageStanza
+import org.traccar.sync.proto.mcs.HeartbeatAck
+import org.traccar.sync.proto.mcs.HeartbeatPing
+import org.traccar.sync.proto.mcs.IqStanza
+import org.traccar.sync.proto.mcs.HeartbeatStat
+import org.traccar.sync.proto.mcs.LoginRequest
+import org.traccar.sync.proto.mcs.LoginResponse
+import org.traccar.sync.proto.mcs.Setting
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException

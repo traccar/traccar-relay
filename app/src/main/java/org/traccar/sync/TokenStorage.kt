@@ -1,4 +1,4 @@
-package org.traccar.find.hub.sync
+package org.traccar.sync
 
 import android.content.Context
 import android.content.SharedPreferences
