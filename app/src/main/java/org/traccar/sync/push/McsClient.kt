@@ -1,4 +1,4 @@
-package org.traccar.sync
+package org.traccar.sync.push
 
 import android.util.Log
 import org.traccar.sync.proto.mcs.Close

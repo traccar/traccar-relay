@@ -1,4 +1,4 @@
-package org.traccar.sync
+package org.traccar.sync.api
 
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient

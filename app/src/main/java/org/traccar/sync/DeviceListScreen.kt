@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import org.traccar.sync.api.Device
 
 @Composable
 fun DeviceListScreen(viewModel: MainViewModel) {

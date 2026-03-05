@@ -1,4 +1,4 @@
-package org.traccar.sync
+package org.traccar.sync.push
 
 import android.util.Base64
 import okhttp3.FormBody

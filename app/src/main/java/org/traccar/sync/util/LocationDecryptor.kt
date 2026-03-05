@@ -1,4 +1,4 @@
-package org.traccar.sync
+package org.traccar.sync.util
 
 import org.bouncycastle.crypto.engines.AESEngine
 import org.bouncycastle.crypto.modes.EAXBlockCipher

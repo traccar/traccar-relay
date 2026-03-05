@@ -11,7 +11,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import org.traccar.sync.api.Device
+import org.traccar.sync.api.NovaApiClient
+import org.traccar.sync.api.SpotApiClient
+import org.traccar.sync.auth.GoogleAuthClient
+import org.traccar.sync.auth.TokenStorage
 import org.traccar.sync.proto.DeviceUpdate
+import org.traccar.sync.push.FcmCredentials
+import org.traccar.sync.push.FcmRegistrationClient
+import org.traccar.sync.push.HttpEceDecryptor
+import org.traccar.sync.push.McsClient
+import org.traccar.sync.util.LocationDecryptor
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
