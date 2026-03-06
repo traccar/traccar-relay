@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 
@@ -51,7 +52,7 @@ fun DeviceListScreen(viewModel: MainViewModel) {
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Traccar Sync") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             Card(
@@ -61,7 +62,7 @@ fun DeviceListScreen(viewModel: MainViewModel) {
                     .clickable { showUrlDialog = true },
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Server URL", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.server_url), style = MaterialTheme.typography.labelSmall)
                     Text(state.serverUrl, style = MaterialTheme.typography.bodyMedium)
                 }
             }
@@ -80,7 +81,7 @@ fun DeviceListScreen(viewModel: MainViewModel) {
                 }
             } else if (state.devices.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No devices found")
+                    Text(stringResource(R.string.no_devices_found))
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
@@ -110,7 +111,7 @@ private fun ServerUrlDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Server URL") },
+        title = { Text(stringResource(R.string.server_url)) },
         text = {
             OutlinedTextField(
                 value = url,
@@ -120,10 +121,10 @@ private fun ServerUrlDialog(
             )
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(url) }) { Text("Save") }
+            TextButton(onClick = { onConfirm(url) }) { Text(stringResource(R.string.save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
     )
 }

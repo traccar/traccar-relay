@@ -13,7 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
+import org.traccar.sync.R
 import org.json.JSONObject
 import org.traccar.sync.proto.EncryptionUnlockRequestExtras
 import org.traccar.sync.proto.SecurityDomain
@@ -33,7 +35,7 @@ fun KeySetupScreen(onSharedKeyReceived: (ByteArray) -> Unit) {
     val unlockUrl = "https://accounts.google.com/encryption/unlock/android?kdi=$kdi"
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Key Setup") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.key_setup)) }) },
     ) { padding ->
         AndroidView(
             modifier = Modifier.padding(padding),
