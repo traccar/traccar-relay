@@ -25,11 +25,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun DeviceListScreen(viewModel: MainViewModel) {
     val state by viewModel.state.collectAsState()
+    val clipboardManager = LocalClipboardManager.current
     var showUrlDialog by remember { mutableStateOf(false) }
 
     if (showUrlDialog) {
@@ -78,6 +81,9 @@ fun DeviceListScreen(viewModel: MainViewModel) {
                     ListItem(
                         headlineContent = { Text(device.name) },
                         supportingContent = { Text(device.id) },
+                        modifier = Modifier.clickable {
+                            clipboardManager.setText(AnnotatedString(device.id))
+                        },
                     )
                     HorizontalDivider()
                 }
