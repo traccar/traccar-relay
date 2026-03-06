@@ -88,6 +88,10 @@ class TokenStorage(context: Context) {
         return raw.split(",").filter { it.isNotEmpty() }
     }
 
+    fun clear() {
+        prefs.edit { clear() }
+    }
+
     companion object {
         private const val KEY_OAUTH_TOKEN = "oauth_token"
         private const val KEY_AAS_TOKEN = "aas_token"

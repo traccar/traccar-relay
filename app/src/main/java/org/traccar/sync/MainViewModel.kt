@@ -76,6 +76,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun signOut() {
+        repo.signOut()
+        _state.update { UiState() }
+    }
+
     companion object {
         private const val TAG = "MainViewModel"
     }

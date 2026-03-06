@@ -42,6 +42,10 @@ class DeviceRepository(context: Context) {
         tokenStorage.saveSharedKey(sharedKey.joinToString("") { "%02x".format(it) })
     }
 
+    fun signOut() {
+        tokenStorage.clear()
+    }
+
     val serverUrl: String get() = tokenStorage.getServerUrl() ?: DEFAULT_SERVER_URL
 
     fun saveServerUrl(url: String) {
