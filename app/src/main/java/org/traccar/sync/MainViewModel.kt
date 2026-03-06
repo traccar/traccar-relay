@@ -12,8 +12,6 @@ import kotlinx.coroutines.launch
 import com.google.firebase.messaging.FirebaseMessaging
 import org.traccar.sync.api.Device
 import org.traccar.sync.api.DeviceRepository
-import org.traccar.sync.api.LocationEntry
-import org.traccar.sync.api.LocationResult
 
 data class UiState(
     val token: String? = null,
@@ -21,10 +19,6 @@ data class UiState(
     val devices: List<Device> = emptyList(),
     val loading: Boolean = false,
     val error: String? = null,
-    val locatingDevice: String? = null,
-    val locatedDeviceId: String? = null,
-    val locationResult: LocationResult? = null,
-    val ringingDevice: String? = null,
     val serverUrl: String = "",
 )
 
@@ -66,15 +60,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _state.update { it.copy(devices = devices) }
 
                 viewModelScope.launch(Dispatchers.IO) {
-                    repo.startPushConnection { deviceId, result ->
-                        _state.update {
-                            it.copy(
-                                locationResult = result,
-                                locatedDeviceId = deviceId,
-                                locatingDevice = null,
-                            )
-                        }
-                    }
+                    repo.startPushConnection { _, _ -> }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching devices", e)
@@ -85,56 +71,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun requestLocation(device: Device) {
-        _state.update {
-            it.copy(
-                locatingDevice = device.id,
-                locatedDeviceId = null,
-                locationResult = null,
-            )
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                repo.requestLocation(device.id)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error requesting location", e)
-                _state.update {
-                    it.copy(
-                        locationResult = LocationResult("Error", listOf(LocationEntry(label = e.message ?: "Unknown error"))),
-                        locatingDevice = null,
-                    )
-                }
-            }
-        }
-    }
-
-    fun playSound(device: Device) {
-        _state.update { it.copy(ringingDevice = device.id) }
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                repo.playSound(device.id)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error playing sound", e)
-                _state.update { it.copy(ringingDevice = null) }
-            }
-        }
-    }
-
     fun updateServerUrl(url: String) {
         repo.saveServerUrl(url)
         _state.update { it.copy(serverUrl = url) }
-    }
-
-    fun stopSound(device: Device) {
-        _state.update { it.copy(ringingDevice = null) }
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                repo.stopSound(device.id)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error stopping sound", e)
-            }
-        }
     }
 
     override fun onCleared() {
