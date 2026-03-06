@@ -11,12 +11,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,6 +32,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceListScreen(viewModel: MainViewModel) {
     val state by viewModel.state.collectAsState()
@@ -46,46 +50,50 @@ fun DeviceListScreen(viewModel: MainViewModel) {
         )
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .clickable { showUrlDialog = true },
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Server URL", style = MaterialTheme.typography.labelSmall)
-                Text(state.serverUrl, style = MaterialTheme.typography.bodyMedium)
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Traccar Sync") }) },
+    ) { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .clickable { showUrlDialog = true },
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Server URL", style = MaterialTheme.typography.labelSmall)
+                    Text(state.serverUrl, style = MaterialTheme.typography.bodyMedium)
+                }
             }
-        }
 
-        if (state.loading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else if (state.error != null) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = state.error!!,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        } else if (state.devices.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No devices found")
-            }
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(state.devices) { device ->
-                    ListItem(
-                        headlineContent = { Text(device.name) },
-                        supportingContent = { Text(device.id) },
-                        modifier = Modifier.clickable {
-                            clipboardManager.setText(AnnotatedString(device.id))
-                        },
+            if (state.loading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (state.error != null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = state.error!!,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp)
                     )
-                    HorizontalDivider()
+                }
+            } else if (state.devices.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No devices found")
+                }
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(state.devices) { device ->
+                        ListItem(
+                            headlineContent = { Text(device.name) },
+                            supportingContent = { Text(device.id) },
+                            modifier = Modifier.clickable {
+                                clipboardManager.setText(AnnotatedString(device.id))
+                            },
+                        )
+                        HorizontalDivider()
+                    }
                 }
             }
         }

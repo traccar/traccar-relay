@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Find Hub Sync"
+rootProject.name = "Traccar Sync"
 include(":app")
