@@ -74,7 +74,7 @@ class DeviceRepository(context: Context) {
 
     // Push connection
 
-    fun startPushConnection(onLocationUpdate: (String, LocationResult) -> Unit) {
+    private fun startPushConnection(onLocationUpdate: (String, LocationResult) -> Unit) {
         val creds = fcmCredentials ?: return
         if (mcsClient != null) return
 
@@ -91,7 +91,7 @@ class DeviceRepository(context: Context) {
         }
     }
 
-    fun stopPushConnection() {
+    private fun stopPushConnection() {
         mcsClient?.disconnect()
         mcsClient = null
     }
@@ -103,18 +103,22 @@ class DeviceRepository(context: Context) {
         val latch = CountDownLatch(1)
         var result: LocationResult? = null
 
-        startPushConnection { id, locationResult ->
-            if (id == deviceId) {
-                result = locationResult
-                latch.countDown()
+        val thread = Thread {
+            startPushConnection { id, locationResult ->
+                if (id == deviceId) {
+                    result = locationResult
+                    latch.countDown()
+                }
             }
         }
+        thread.start()
 
         try {
             requestLocation(deviceId)
             latch.await(30, TimeUnit.SECONDS)
         } finally {
             stopPushConnection()
+            thread.join(5000)
         }
 
         val entry = result?.locations
@@ -131,9 +135,7 @@ class DeviceRepository(context: Context) {
         )
     }
 
-    // Actions
-
-    fun requestLocation(deviceId: String) {
+    private fun requestLocation(deviceId: String) {
         val creds = fcmCredentials ?: throw Exception("FCM not registered")
         val admToken = getAdmToken()
         val (payload, requestUuid) = NovaApiClient.buildLocationRequest(deviceId, creds.fcmToken)

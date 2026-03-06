@@ -31,7 +31,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
-            repo.onFirebaseTokenChanged(token)
+            viewModelScope.launch(Dispatchers.IO) {
+                repo.onFirebaseTokenChanged(token)
+            }
         }
         val oauthToken = repo.savedOauthToken
         if (oauthToken != null) {
