@@ -66,7 +66,7 @@ class DeviceRepository(context: Context) {
 
         try {
             client.connect(creds.gcmAndroidId, creds.gcmSecurityToken) { message ->
-                handlePushMessage(message, onLocationUpdate)
+                handlePushMessage(creds, message, onLocationUpdate)
             }
         } catch (e: Exception) {
             Log.e(TAG, "MCS connection error", e)
@@ -172,11 +172,10 @@ class DeviceRepository(context: Context) {
     }
 
     private fun handlePushMessage(
+        creds: FcmCredentials,
         message: org.traccar.sync.proto.mcs.DataMessageStanza,
         onLocationUpdate: (String, LocationResult) -> Unit,
     ) {
-        val creds = fcmCredentials ?: return
-
         try {
             val appDataMap = message.app_data.associate { it.key to it.value_ }
 
@@ -216,14 +215,15 @@ class DeviceRepository(context: Context) {
     }
 
     private fun buildLocationResult(deviceUpdate: DeviceUpdate): LocationResult {
-        val deviceName = deviceUpdate.deviceMetadata?.userDefinedDeviceName ?: "Unknown"
-        val locationInfo = deviceUpdate.deviceMetadata?.information?.locationInformation
-        val reports = locationInfo?.reports?.recentLocationAndNetworkLocations
+        val metadata = deviceUpdate.deviceMetadata
+        val deviceName = metadata?.userDefinedDeviceName ?: "Unknown"
+        val information = metadata?.information
+        val reports = information?.locationInformation?.reports?.recentLocationAndNetworkLocations
 
         val ownerKeyHex = tokenStorage.getOwnerKey()
         val ownerKey = ownerKeyHex?.chunked(2)?.map { it.toInt(16).toByte() }?.toByteArray()
 
-        val encryptedEik = deviceUpdate.deviceMetadata?.information?.deviceRegistration
+        val encryptedEik = information?.deviceRegistration
             ?.encryptedUserSecrets?.encryptedIdentityKey?.toByteArray()
 
         var identityKey: ByteArray? = null
@@ -263,29 +263,28 @@ class DeviceRepository(context: Context) {
             java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
                 .format(java.util.Date(it.seconds.toLong() * 1000))
         }
-        val status = report.status?.name
-        val accuracy = report.geoLocation?.accuracy
+        val status = report.status.name
+        val geoLocation = report.geoLocation
+        val accuracy = geoLocation?.accuracy
         val semanticLocation = report.semanticLocation?.locationName
 
         var latitude: Double? = null
         var longitude: Double? = null
         var altitude: Int? = null
 
-        val geo = report.geoLocation?.encryptedReport
-        if (geo != null && identityKey != null) {
+        val geo = geoLocation?.encryptedReport
+        if (geoLocation != null && geo != null && identityKey != null) {
             try {
-                val encLoc = geo.encryptedLocation?.toByteArray()
-                val pubKeyRandom = geo.publicKeyRandom?.toByteArray()
-                val deviceTimeOffset = report.geoLocation?.deviceTimeOffset?.toLong() ?: 0L
+                val encLoc = geo.encryptedLocation.toByteArray()
+                val pubKeyRandom = geo.publicKeyRandom.toByteArray()
+                val deviceTimeOffset = geoLocation.deviceTimeOffset.toLong()
 
-                if (encLoc != null) {
-                    val decrypted = LocationDecryptor.decryptLocation(
-                        identityKey, encLoc, pubKeyRandom, deviceTimeOffset
-                    )
-                    latitude = decrypted.latitude
-                    longitude = decrypted.longitude
-                    altitude = decrypted.altitude
-                }
+                val decrypted = LocationDecryptor.decryptLocation(
+                    identityKey, encLoc, pubKeyRandom, deviceTimeOffset
+                )
+                latitude = decrypted.latitude
+                longitude = decrypted.longitude
+                altitude = decrypted.altitude
             } catch (e: Exception) {
                 Log.e(TAG, "Error decrypting location for $label", e)
             }
