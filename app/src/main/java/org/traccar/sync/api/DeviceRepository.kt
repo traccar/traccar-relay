@@ -5,6 +5,8 @@ import android.provider.Settings
 import android.util.Base64
 import android.util.Log
 import org.json.JSONObject
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import org.traccar.sync.auth.GoogleAuthClient
 import org.traccar.sync.auth.TokenStorage
 import org.traccar.sync.proto.DeviceUpdate
@@ -94,6 +96,41 @@ class DeviceRepository(context: Context) {
         mcsClient = null
     }
 
+    fun requestAndUploadLocation(deviceId: String) {
+        val serverUrl = tokenStorage.getServerUrl() ?: return
+        ensureFcmRegistered()
+
+        val latch = CountDownLatch(1)
+        var result: LocationResult? = null
+
+        startPushConnection { id, locationResult ->
+            if (id == deviceId) {
+                result = locationResult
+                latch.countDown()
+            }
+        }
+
+        try {
+            requestLocation(deviceId)
+            latch.await(30, TimeUnit.SECONDS)
+        } finally {
+            stopPushConnection()
+        }
+
+        val entry = result?.locations
+            ?.firstOrNull { it.latitude != null && it.longitude != null }
+            ?: return
+
+        TraccarApiClient.sendLocation(
+            serverUrl, deviceId,
+            lat = entry.latitude!!,
+            lon = entry.longitude!!,
+            timestamp = entry.timestamp / 1000,
+            accuracy = entry.accuracy,
+            altitude = entry.altitude,
+        )
+    }
+
     // Actions
 
     fun requestLocation(deviceId: String) {
@@ -102,20 +139,6 @@ class DeviceRepository(context: Context) {
         val (payload, requestUuid) = NovaApiClient.buildLocationRequest(deviceId, creds.fcmToken)
         pendingRequestUuid = requestUuid
         pendingDeviceId = deviceId
-        NovaApiClient.executeAction(admToken, payload)
-    }
-
-    fun playSound(deviceId: String) {
-        val creds = fcmCredentials ?: throw Exception("FCM not registered")
-        val admToken = getAdmToken()
-        val payload = NovaApiClient.buildSoundRequest(deviceId, creds.fcmToken, start = true)
-        NovaApiClient.executeAction(admToken, payload)
-    }
-
-    fun stopSound(deviceId: String) {
-        val creds = fcmCredentials ?: throw Exception("FCM not registered")
-        val admToken = getAdmToken()
-        val payload = NovaApiClient.buildSoundRequest(deviceId, creds.fcmToken, start = false)
         NovaApiClient.executeAction(admToken, payload)
     }
 
@@ -274,10 +297,7 @@ class DeviceRepository(context: Context) {
         identityKey: ByteArray?,
         label: String,
     ): LocationEntry {
-        val timestamp = time?.let {
-            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
-                .format(java.util.Date(it.seconds.toLong() * 1000))
-        }
+        val millis = time?.let { it.seconds.toLong() * 1000 } ?: 0
         val status = report.status.name
         val geoLocation = report.geoLocation
         val accuracy = geoLocation?.accuracy
@@ -307,7 +327,7 @@ class DeviceRepository(context: Context) {
 
         return LocationEntry(
             label = label,
-            timestamp = timestamp,
+            timestamp = millis,
             status = status,
             accuracy = accuracy,
             latitude = latitude,
@@ -340,7 +360,7 @@ class DeviceRepository(context: Context) {
 
 data class LocationEntry(
     val label: String,
-    val timestamp: String? = null,
+    val timestamp: Long = 0,
     val status: String? = null,
     val accuracy: Float? = null,
     val latitude: Double? = null,

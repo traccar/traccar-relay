@@ -58,10 +58,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val devices = repo.loadDevices(oauthToken, sharedKey)
                 _state.update { it.copy(devices = devices) }
-
-                viewModelScope.launch(Dispatchers.IO) {
-                    repo.startPushConnection { _, _ -> }
-                }
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching devices", e)
                 _state.update { it.copy(error = e.message) }
@@ -76,11 +72,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             repo.saveServerUrl(url)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        repo.stopPushConnection()
     }
 
     companion object {
