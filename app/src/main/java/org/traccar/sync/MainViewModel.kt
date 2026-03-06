@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.google.firebase.messaging.FirebaseMessaging
 import org.traccar.sync.api.Device
 import org.traccar.sync.api.DeviceRepository
 import org.traccar.sync.api.LocationEntry
@@ -35,6 +36,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val state: StateFlow<UiState> = _state
 
     init {
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            repo.onFirebaseTokenChanged(token)
+        }
         val oauthToken = repo.savedOauthToken
         if (oauthToken != null) {
             _state.update { it.copy(needsKeySetup = !repo.hasSharedKey()) }

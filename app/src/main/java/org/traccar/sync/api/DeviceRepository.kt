@@ -25,6 +25,7 @@ class DeviceRepository(context: Context) {
     private var mcsClient: McsClient? = null
     private var pendingRequestUuid: String? = null
     private var pendingDeviceId: String? = null
+    private var firebaseToken: String? = null
 
     val savedOauthToken: String? get() = tokenStorage.getToken()
 
@@ -43,6 +44,12 @@ class DeviceRepository(context: Context) {
 
     fun saveServerUrl(url: String) {
         tokenStorage.saveServerUrl(url)
+        registerDevicesOnServer()
+    }
+
+    fun onFirebaseTokenChanged(token: String) {
+        firebaseToken = token
+        registerDevicesOnServer()
     }
 
     fun loadDevices(oauthToken: String, sharedKey: ByteArray? = null): List<Device> {
@@ -57,7 +64,9 @@ class DeviceRepository(context: Context) {
         }
 
         val devices = NovaApiClient.listDevices(getAdmToken())
+        tokenStorage.saveDeviceIds(devices.map { it.id })
         ensureFcmRegistered()
+        registerDevicesOnServer()
         return devices
     }
 
@@ -306,6 +315,21 @@ class DeviceRepository(context: Context) {
             altitude = altitude,
             semanticLocation = semanticLocation,
         )
+    }
+
+    private fun registerDevicesOnServer() {
+        val serverUrl = tokenStorage.getServerUrl() ?: return
+        val firebaseToken = firebaseToken ?: return
+        val deviceIds = tokenStorage.getDeviceIds()
+        if (deviceIds.isEmpty()) return
+
+        for (id in deviceIds) {
+            try {
+                TraccarApiClient.registerDevice(serverUrl, id, firebaseToken)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error registering device $id", e)
+            }
+        }
     }
 
     companion object {
