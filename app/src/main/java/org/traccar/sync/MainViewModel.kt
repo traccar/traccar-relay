@@ -72,8 +72,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateServerUrl(url: String) {
-        repo.saveServerUrl(url)
         _state.update { it.copy(serverUrl = url) }
+        viewModelScope.launch(Dispatchers.IO) {
+            repo.saveServerUrl(url)
+        }
     }
 
     override fun onCleared() {
