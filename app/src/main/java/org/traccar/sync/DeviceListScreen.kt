@@ -27,59 +27,52 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import org.traccar.sync.api.Device
 import org.traccar.sync.api.LocationResult
 
 @Composable
 fun DeviceListScreen(viewModel: MainViewModel) {
-    val devices by viewModel.devices.collectAsState()
-    val loading by viewModel.loading.collectAsState()
-    val error by viewModel.error.collectAsState()
-    val locatingDevice by viewModel.locatingDevice.collectAsState()
-    val locatedDeviceId by viewModel.locatedDeviceId.collectAsState()
-    val locationResult by viewModel.locationResult.collectAsState()
-    val ringingDevice by viewModel.ringingDevice.collectAsState()
+    val state by viewModel.state.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (loading) {
+        if (state.loading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-        } else if (error != null) {
+        } else if (state.error != null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = error!!,
+                    text = state.error!!,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(16.dp)
                 )
             }
-        } else if (devices.isEmpty()) {
+        } else if (state.devices.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("No devices found")
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(devices) { device ->
+                items(state.devices) { device ->
                     ListItem(
                         headlineContent = { Text(device.name) },
                         supportingContent = {
                             Column {
                                 Text(device.id)
-                                if (locatingDevice == device.id) {
+                                if (state.locatingDevice == device.id) {
                                     Text(
                                         "Locating...",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
-                                if (locationResult != null && locatedDeviceId == device.id) {
-                                    LocationResultView(locationResult!!)
+                                if (state.locationResult != null && state.locatedDeviceId == device.id) {
+                                    LocationResultView(state.locationResult!!)
                                 }
                             }
                         },
                         trailingContent = {
                             Row {
-                                if (ringingDevice == device.id) {
+                                if (state.ringingDevice == device.id) {
                                     IconButton(onClick = { viewModel.stopSound(device) }) {
                                         Text("\uD83D\uDD15")
                                     }
@@ -88,7 +81,7 @@ fun DeviceListScreen(viewModel: MainViewModel) {
                                         Text("\uD83D\uDD14")
                                     }
                                 }
-                                if (locatingDevice == device.id) {
+                                if (state.locatingDevice == device.id) {
                                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                                 } else {
                                     IconButton(onClick = { viewModel.requestLocation(device) }) {

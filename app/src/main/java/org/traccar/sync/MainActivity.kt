@@ -19,13 +19,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 val viewModel: MainViewModel = viewModel()
-                val token by viewModel.token.collectAsState()
-                val needsKeySetup by viewModel.needsKeySetup.collectAsState()
+                val state by viewModel.state.collectAsState()
 
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    if (token == null) {
+                    if (state.token == null) {
                         LoginScreen(onTokenReceived = viewModel::onTokenReceived)
-                    } else if (needsKeySetup) {
+                    } else if (state.needsKeySetup) {
                         KeySetupScreen(onSharedKeyReceived = viewModel::onSharedKeyReceived)
                     } else {
                         DeviceListScreen(viewModel)
