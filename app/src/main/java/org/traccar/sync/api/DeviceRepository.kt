@@ -39,6 +39,12 @@ class DeviceRepository(context: Context) {
         tokenStorage.saveSharedKey(sharedKey.joinToString("") { "%02x".format(it) })
     }
 
+    val serverUrl: String get() = tokenStorage.getServerUrl() ?: DEFAULT_SERVER_URL
+
+    fun saveServerUrl(url: String) {
+        tokenStorage.saveServerUrl(url)
+    }
+
     fun loadDevices(oauthToken: String, sharedKey: ByteArray? = null): List<Device> {
         ensureAasToken(oauthToken)
 
@@ -304,6 +310,7 @@ class DeviceRepository(context: Context) {
 
     companion object {
         private const val TAG = "DeviceRepository"
+        private const val DEFAULT_SERVER_URL = "http://demo.traccar.org:5055"
     }
 }
 

@@ -24,13 +24,14 @@ data class UiState(
     val locatedDeviceId: String? = null,
     val locationResult: LocationResult? = null,
     val ringingDevice: String? = null,
+    val serverUrl: String = "",
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repo = DeviceRepository(application)
 
-    private val _state = MutableStateFlow(UiState(token = repo.savedOauthToken))
+    private val _state = MutableStateFlow(UiState(token = repo.savedOauthToken, serverUrl = repo.serverUrl))
     val state: StateFlow<UiState> = _state
 
     init {
@@ -114,6 +115,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _state.update { it.copy(ringingDevice = null) }
             }
         }
+    }
+
+    fun updateServerUrl(url: String) {
+        repo.saveServerUrl(url)
+        _state.update { it.copy(serverUrl = url) }
     }
 
     fun stopSound(device: Device) {

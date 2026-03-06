@@ -71,6 +71,14 @@ class TokenStorage(context: Context) {
         return prefs.getString(KEY_OWNER_KEY, null)
     }
 
+    fun saveServerUrl(url: String) {
+        prefs.edit { putString(KEY_SERVER_URL, url) }
+    }
+
+    fun getServerUrl(): String? {
+        return prefs.getString(KEY_SERVER_URL, null)
+    }
+
     companion object {
         private const val KEY_OAUTH_TOKEN = "oauth_token"
         private const val KEY_AAS_TOKEN = "aas_token"
@@ -78,5 +86,6 @@ class TokenStorage(context: Context) {
         private const val KEY_FCM_CREDENTIALS = "fcm_credentials"
         private const val KEY_SHARED_KEY = "shared_key"
         private const val KEY_OWNER_KEY = "owner_key"
+        private const val KEY_SERVER_URL = "server_url"
     }
 }
