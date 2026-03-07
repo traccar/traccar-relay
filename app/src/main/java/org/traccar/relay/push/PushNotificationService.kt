@@ -1,4 +1,4 @@
-package org.traccar.sync.push
+package org.traccar.relay.push
 
 import android.util.Log
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -8,7 +8,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import org.traccar.sync.api.DeviceRepository
+import org.traccar.relay.api.DeviceRepository
 import java.util.concurrent.TimeUnit
 
 class PushNotificationService : FirebaseMessagingService() {

@@ -1,4 +1,4 @@
-package org.traccar.sync.api
+package org.traccar.relay.api
 
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrl

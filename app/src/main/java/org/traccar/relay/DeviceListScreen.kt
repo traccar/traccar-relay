@@ -1,4 +1,4 @@
-package org.traccar.sync
+package org.traccar.relay
 
 import android.content.ClipData
 import androidx.compose.foundation.clickable
@@ -30,8 +30,8 @@ import androidx.compose.ui.platform.LocalClipboard
 import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 
-import org.traccar.sync.ui.ServerUrlDialog
-import org.traccar.sync.ui.ShimmerListItem
+import org.traccar.relay.ui.ServerUrlDialog
+import org.traccar.relay.ui.ShimmerListItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

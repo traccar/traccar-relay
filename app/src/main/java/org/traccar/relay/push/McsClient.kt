@@ -1,15 +1,15 @@
-package org.traccar.sync.push
+package org.traccar.relay.push
 
 import android.util.Log
-import org.traccar.sync.proto.mcs.Close
-import org.traccar.sync.proto.mcs.DataMessageStanza
-import org.traccar.sync.proto.mcs.HeartbeatAck
-import org.traccar.sync.proto.mcs.HeartbeatPing
-import org.traccar.sync.proto.mcs.IqStanza
-import org.traccar.sync.proto.mcs.HeartbeatStat
-import org.traccar.sync.proto.mcs.LoginRequest
-import org.traccar.sync.proto.mcs.LoginResponse
-import org.traccar.sync.proto.mcs.Setting
+import org.traccar.relay.proto.mcs.Close
+import org.traccar.relay.proto.mcs.DataMessageStanza
+import org.traccar.relay.proto.mcs.HeartbeatAck
+import org.traccar.relay.proto.mcs.HeartbeatPing
+import org.traccar.relay.proto.mcs.IqStanza
+import org.traccar.relay.proto.mcs.HeartbeatStat
+import org.traccar.relay.proto.mcs.LoginRequest
+import org.traccar.relay.proto.mcs.LoginResponse
+import org.traccar.relay.proto.mcs.Setting
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException

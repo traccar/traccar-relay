@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Traccar Sync"
+rootProject.name = "Traccar Relay"
 include(":app")

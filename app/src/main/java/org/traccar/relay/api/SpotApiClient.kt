@@ -1,11 +1,11 @@
-package org.traccar.sync.api
+package org.traccar.relay.api
 
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.traccar.sync.proto.GetEidInfoForE2eeDevicesRequest
-import org.traccar.sync.proto.GetEidInfoForE2eeDevicesResponse
+import org.traccar.relay.proto.GetEidInfoForE2eeDevicesRequest
+import org.traccar.relay.proto.GetEidInfoForE2eeDevicesResponse
 import java.nio.ByteBuffer
 
 object SpotApiClient {

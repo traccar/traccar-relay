@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "org.traccar.sync"
+    namespace = "org.traccar.relay"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -14,7 +14,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "org.traccar.sync"
+        applicationId = "org.traccar.relay"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

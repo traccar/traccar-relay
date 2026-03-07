@@ -1,4 +1,4 @@
-package org.traccar.sync.api
+package org.traccar.relay.api
 
 import android.content.Context
 import android.provider.Settings
@@ -7,14 +7,14 @@ import android.util.Log
 import org.json.JSONObject
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import org.traccar.sync.auth.GoogleAuthClient
-import org.traccar.sync.auth.TokenStorage
-import org.traccar.sync.proto.DeviceUpdate
-import org.traccar.sync.push.FcmCredentials
-import org.traccar.sync.push.FcmRegistrationClient
-import org.traccar.sync.push.HttpEceDecryptor
-import org.traccar.sync.push.McsClient
-import org.traccar.sync.util.LocationDecryptor
+import org.traccar.relay.auth.GoogleAuthClient
+import org.traccar.relay.auth.TokenStorage
+import org.traccar.relay.proto.DeviceUpdate
+import org.traccar.relay.push.FcmCredentials
+import org.traccar.relay.push.FcmRegistrationClient
+import org.traccar.relay.push.HttpEceDecryptor
+import org.traccar.relay.push.McsClient
+import org.traccar.relay.util.LocationDecryptor
 
 class DeviceRepository(context: Context) {
 
@@ -217,7 +217,7 @@ class DeviceRepository(context: Context) {
 
     private fun handlePushMessage(
         creds: FcmCredentials,
-        message: org.traccar.sync.proto.mcs.DataMessageStanza,
+        message: org.traccar.relay.proto.mcs.DataMessageStanza,
         onLocationUpdate: (String, LocationResult) -> Unit,
     ) {
         try {
@@ -298,8 +298,8 @@ class DeviceRepository(context: Context) {
     }
 
     private fun buildLocationEntry(
-        report: org.traccar.sync.proto.LocationReport,
-        time: org.traccar.sync.proto.Time?,
+        report: org.traccar.relay.proto.LocationReport,
+        time: org.traccar.relay.proto.Time?,
         identityKey: ByteArray?,
         label: String,
     ): LocationEntry {

@@ -1,26 +1,26 @@
-package org.traccar.sync.api
+package org.traccar.relay.api
 
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.traccar.sync.proto.CanonicId
-import org.traccar.sync.proto.DeviceType
-import org.traccar.sync.proto.DevicesList
-import org.traccar.sync.proto.DevicesListRequest
-import org.traccar.sync.proto.DevicesListRequestPayload
-import org.traccar.sync.proto.ExecuteActionDeviceIdentifier
-import org.traccar.sync.proto.DeviceComponent
-import org.traccar.sync.proto.ExecuteActionLocateTrackerType
-import org.traccar.sync.proto.ExecuteActionSoundType
-import org.traccar.sync.proto.ExecuteActionRequest
-import org.traccar.sync.proto.ExecuteActionRequestMetadata
-import org.traccar.sync.proto.ExecuteActionScope
-import org.traccar.sync.proto.ExecuteActionType
-import org.traccar.sync.proto.GcmCloudMessagingIdProtobuf
-import org.traccar.sync.proto.IdentifierInformationType
-import org.traccar.sync.proto.SpotContributorType
-import org.traccar.sync.proto.Time
+import org.traccar.relay.proto.CanonicId
+import org.traccar.relay.proto.DeviceType
+import org.traccar.relay.proto.DevicesList
+import org.traccar.relay.proto.DevicesListRequest
+import org.traccar.relay.proto.DevicesListRequestPayload
+import org.traccar.relay.proto.ExecuteActionDeviceIdentifier
+import org.traccar.relay.proto.DeviceComponent
+import org.traccar.relay.proto.ExecuteActionLocateTrackerType
+import org.traccar.relay.proto.ExecuteActionSoundType
+import org.traccar.relay.proto.ExecuteActionRequest
+import org.traccar.relay.proto.ExecuteActionRequestMetadata
+import org.traccar.relay.proto.ExecuteActionScope
+import org.traccar.relay.proto.ExecuteActionType
+import org.traccar.relay.proto.GcmCloudMessagingIdProtobuf
+import org.traccar.relay.proto.IdentifierInformationType
+import org.traccar.relay.proto.SpotContributorType
+import org.traccar.relay.proto.Time
 import java.util.UUID
 
 data class Device(val name: String, val id: String)

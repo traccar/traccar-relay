@@ -1,10 +1,10 @@
-package org.traccar.sync.push
+package org.traccar.relay.push
 
 import android.content.Context
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import org.traccar.sync.api.DeviceRepository
+import org.traccar.relay.api.DeviceRepository
 
 class LocationWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
 

@@ -1,4 +1,4 @@
-package org.traccar.sync.push
+package org.traccar.relay.push
 
 import android.util.Base64
 import java.nio.ByteBuffer

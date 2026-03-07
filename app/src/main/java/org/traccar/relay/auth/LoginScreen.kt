@@ -1,4 +1,4 @@
-package org.traccar.sync.auth
+package org.traccar.relay.auth
 
 import android.os.Handler
 import android.os.Looper
@@ -17,7 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
-import org.traccar.sync.R
+import org.traccar.relay.R
 
 private const val LOGIN_URL = "https://accounts.google.com/EmbeddedSetup"
 private const val COOKIE_CHECK_INTERVAL = 1000L

@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:39016471396:android:891441f44ad52f46247871",
+        "mobilesdk_app_id": "1:39016471396:android:60320ad22ab36310247871",
         "android_client_info": {
-          "package_name": "org.traccar.sync"
+          "package_name": "org.traccar.relay"
         }
       },
       "oauth_client": [],

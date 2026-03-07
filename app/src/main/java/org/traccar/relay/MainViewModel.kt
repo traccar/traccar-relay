@@ -1,4 +1,4 @@
-package org.traccar.sync
+package org.traccar.relay
 
 import android.app.Application
 import android.util.Log
@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.google.firebase.messaging.FirebaseMessaging
-import org.traccar.sync.api.Device
-import org.traccar.sync.api.DeviceRepository
+import org.traccar.relay.api.Device
+import org.traccar.relay.api.DeviceRepository
 
 data class UiState(
     val token: String? = null,

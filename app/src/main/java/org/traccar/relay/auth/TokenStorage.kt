@@ -1,4 +1,4 @@
-package org.traccar.sync.auth
+package org.traccar.relay.auth
 
 import android.content.Context
 import android.content.SharedPreferences

@@ -1,4 +1,4 @@
-package org.traccar.sync.auth
+package org.traccar.relay.auth
 
 import android.util.Base64
 import android.util.Log
@@ -15,10 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
-import org.traccar.sync.R
+import org.traccar.relay.R
 import org.json.JSONObject
-import org.traccar.sync.proto.EncryptionUnlockRequestExtras
-import org.traccar.sync.proto.SecurityDomain
+import org.traccar.relay.proto.EncryptionUnlockRequestExtras
+import org.traccar.relay.proto.SecurityDomain
 import java.util.UUID
 
 private const val TAG = "KeySetupScreen"

@@ -1,4 +1,4 @@
-package org.traccar.sync.ui
+package org.traccar.relay.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
@@ -12,7 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import org.traccar.sync.R
+import org.traccar.relay.R
 
 @Composable
 fun ServerUrlDialog(

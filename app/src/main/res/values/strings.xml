@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Traccar Sync</string>
+    <string name="app_name">Traccar Relay</string>
     <string name="sign_in">Sign In</string>
     <string name="key_setup">Key Setup</string>
     <string name="server_url">Server URL</string>

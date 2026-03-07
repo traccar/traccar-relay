@@ -1,4 +1,4 @@
-package org.traccar.sync.auth
+package org.traccar.relay.auth
 
 import okhttp3.FormBody
 import okhttp3.OkHttpClient

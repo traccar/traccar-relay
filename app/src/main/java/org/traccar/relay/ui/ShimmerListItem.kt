@@ -1,4 +1,4 @@
-package org.traccar.sync.ui
+package org.traccar.relay.ui
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
