@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.wire.runtime)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.work.runtime)
     implementation(libs.bouncycastle)
 
     implementation(platform(libs.firebase.bom))
