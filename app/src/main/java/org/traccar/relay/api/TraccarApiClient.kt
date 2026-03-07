@@ -1,7 +1,6 @@
 package org.traccar.relay.api
 
 import okhttp3.FormBody
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -30,14 +29,17 @@ object TraccarApiClient {
         accuracy: Float? = null,
         altitude: Int? = null,
     ) {
-        val url = serverUrl.toHttpUrl().newBuilder()
-            .addQueryParameter("id", deviceId)
-            .addQueryParameter("lat", lat.toString())
-            .addQueryParameter("lon", lon.toString())
-            .addQueryParameter("timestamp", timestamp.toString())
-        accuracy?.let { url.addQueryParameter("accuracy", it.toString()) }
-        altitude?.let { url.addQueryParameter("altitude", it.toString()) }
-        val request = Request.Builder().url(url.build()).build()
+        val body = FormBody.Builder()
+            .add("id", deviceId)
+            .add("lat", lat.toString())
+            .add("lon", lon.toString())
+            .add("timestamp", timestamp.toString())
+        accuracy?.let { body.add("accuracy", it.toString()) }
+        altitude?.let { body.add("altitude", it.toString()) }
+        val request = Request.Builder()
+            .url(serverUrl)
+            .post(body.build())
+            .build()
         client.newCall(request).execute().close()
     }
 }
