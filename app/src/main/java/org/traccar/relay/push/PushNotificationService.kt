@@ -1,7 +1,9 @@
 package org.traccar.relay.push
 
 import android.util.Log
+import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -33,6 +35,10 @@ class PushNotificationService : FirebaseMessagingService() {
                     ?: return
                 val workRequest = PeriodicWorkRequestBuilder<LocationWorker>(
                     interval, TimeUnit.SECONDS,
+                ).setConstraints(
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .build()
                 ).setInputData(
                     workDataOf(LocationWorker.KEY_DEVICE_ID to deviceId),
                 ).build()

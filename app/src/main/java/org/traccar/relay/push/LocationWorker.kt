@@ -10,12 +10,14 @@ class LocationWorker(context: Context, params: WorkerParameters) : Worker(contex
 
     override fun doWork(): Result {
         val deviceId = inputData.getString(KEY_DEVICE_ID) ?: return Result.failure()
+        Log.i(TAG, "Starting periodic location request for device $deviceId")
         return try {
             DeviceRepository(applicationContext).requestAndUploadLocation(deviceId)
+            Log.i(TAG, "Periodic location request completed for device $deviceId")
             Result.success()
         } catch (e: Exception) {
             Log.e(TAG, "Error handling periodic location request", e)
-            Result.retry()
+            Result.failure()
         }
     }
 
