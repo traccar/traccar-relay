@@ -83,7 +83,7 @@ class McsClient {
     private fun sendLogin(androidId: String, securityToken: String) {
         val hexId = androidId.toLong().toString(16)
         val req = LoginRequest(
-            id = "94.0.4606.51",
+            id = "133.0.6917.92",
             domain = "mcs.android.com",
             user = androidId,
             resource = androidId,

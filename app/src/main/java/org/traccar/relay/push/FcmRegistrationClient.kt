@@ -43,7 +43,7 @@ object FcmRegistrationClient {
     private const val APP_ID = "1:289722593072:android:3cfcf5bc359f0308"
     private const val API_KEY = "AIzaSyD_gko3P392v6how2H7UpdeXQ0v2HLettc"
     private const val BUNDLE_ID = "com.google.android.apps.adm"
-    private const val CHROME_VERSION = "94.0.4606.51"
+    private const val CHROME_VERSION = "133.0.6917.92"
     private const val ADM_PACKAGE = "com.google.android.apps.adm"
     private const val ADM_CERT = "38918a453d07199354f8b19af05ec6562ced5788"
 
@@ -95,6 +95,26 @@ object FcmRegistrationClient {
             user_serial_number = 0,
         )
 
+        val firstResponse = performCheckin(payload)
+        val androidId = firstResponse.android_id
+            ?: throw Exception("No android_id in checkin response")
+        val securityToken = firstResponse.security_token
+            ?: throw Exception("No security_token in checkin response")
+
+        // Second checkin to confirm device registration
+        val confirmPayload = AndroidCheckinRequest(
+            checkin = checkin,
+            version = 3,
+            user_serial_number = 0,
+            id = androidId,
+            security_token = securityToken,
+        )
+        performCheckin(confirmPayload)
+
+        return Pair(androidId.toString(), securityToken.toString())
+    }
+
+    private fun performCheckin(payload: AndroidCheckinRequest): AndroidCheckinResponse {
         val request = Request.Builder()
             .url(GCM_CHECKIN_URL)
             .post(payload.encode().toRequestBody("application/x-protobuf".toMediaType()))
@@ -102,46 +122,47 @@ object FcmRegistrationClient {
 
         val response = client.newCall(request).execute()
         val bytes = response.body?.bytes() ?: throw Exception("Empty checkin response")
-
-        val checkinResponse = AndroidCheckinResponse.ADAPTER.decode(bytes)
-        val androidId = checkinResponse.android_id?.toString()
-            ?: throw Exception("No android_id in checkin response")
-        val securityToken = checkinResponse.security_token?.toString()
-            ?: throw Exception("No security_token in checkin response")
-
-        return Pair(androidId, securityToken)
+        return AndroidCheckinResponse.ADAPTER.decode(bytes)
     }
 
     private fun gcmRegister(androidId: String, securityToken: String): Pair<String, String> {
         val appId = "wp:$BUNDLE_ID#${UUID.randomUUID()}"
 
-        val body = FormBody.Builder()
-            .add("app", "org.chromium.linux")
-            .add("X-subtype", appId)
-            .add("device", androidId)
-            .add("sender", GCM_SERVER_KEY_B64)
-            .build()
+        for (attempt in 1..5) {
+            val body = FormBody.Builder()
+                .add("app", "org.chromium.linux")
+                .add("X-subtype", appId)
+                .add("device", androidId)
+                .add("sender", GCM_SERVER_KEY_B64)
+                .build()
 
-        val request = Request.Builder()
-            .url(GCM_REGISTER_URL)
-            .post(body)
-            .header("Authorization", "AidLogin $androidId:$securityToken")
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .build()
+            val request = Request.Builder()
+                .url(GCM_REGISTER_URL)
+                .post(body)
+                .header("Authorization", "AidLogin $androidId:$securityToken")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .build()
 
-        val response = client.newCall(request).execute()
-        val text = response.body?.string() ?: throw Exception("Empty GCM register response")
+            val response = client.newCall(request).execute()
+            val text = response.body?.string() ?: throw Exception("Empty GCM register response")
 
-        if (text.contains("Error")) {
-            throw Exception("GCM register error: $text")
+            if (text.contains("Error")) {
+                if (attempt < 5) {
+                    Thread.sleep(1000L * attempt)
+                    continue
+                }
+                throw Exception("GCM register error: $text")
+            }
+
+            val token = text.substringAfter("token=", "")
+            if (token.isEmpty()) {
+                throw Exception("No token in GCM register response: $text")
+            }
+
+            return Pair(token, appId)
         }
 
-        val token = text.substringAfter("token=", "")
-        if (token.isEmpty()) {
-            throw Exception("No token in GCM register response: $text")
-        }
-
-        return Pair(token, appId)
+        throw Exception("GCM register failed after retries")
     }
 
     data class EcKeys(val public_: String, val private_: String, val secret: String)
