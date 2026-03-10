@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.google.firebase.messaging.FirebaseMessaging
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import org.traccar.relay.api.Device
 import org.traccar.relay.api.DeviceRepository
 
@@ -17,6 +19,7 @@ data class UiState(
     val token: String? = null,
     val needsKeySetup: Boolean = false,
     val devices: List<Device> = emptyList(),
+    val activeDevices: Set<String> = emptySet(),
     val loading: Boolean = false,
     val error: String? = null,
     val serverUrl: String = "",
@@ -25,6 +28,7 @@ data class UiState(
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repo = DeviceRepository(application)
+    private val workManager = WorkManager.getInstance(application)
 
     private val _state = MutableStateFlow(UiState(token = repo.savedOauthToken, serverUrl = repo.serverUrl))
     val state: StateFlow<UiState> = _state
@@ -59,7 +63,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _state.update { it.copy(loading = true, error = null) }
             try {
                 val devices = repo.loadDevices(oauthToken, sharedKey)
-                _state.update { it.copy(devices = devices) }
+                val activeDevices = devices.filter { device ->
+                    val workInfos = workManager
+                        .getWorkInfosForUniqueWork("periodic_location_${device.id}")
+                        .get()
+                    workInfos.any { it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING }
+                }.map { it.id }.toSet()
+                _state.update { it.copy(devices = devices, activeDevices = activeDevices) }
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching devices", e)
                 _state.update { it.copy(error = e.message) }
