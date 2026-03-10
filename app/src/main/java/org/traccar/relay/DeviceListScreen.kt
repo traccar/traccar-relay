@@ -10,7 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -108,7 +108,7 @@ fun DeviceListScreen(viewModel: MainViewModel) {
                         supportingContent = { Text(device.id, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                         trailingContent = if (device.id in state.activeDevices) {{
                             Icon(
-                                Icons.Default.Sync,
+                                Icons.Default.Schedule,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                             )
