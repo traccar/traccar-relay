@@ -15,11 +15,17 @@ import androidx.work.WorkManager
 import org.traccar.relay.api.Device
 import org.traccar.relay.api.DeviceRepository
 
+data class WorkScheduleInfo(
+    val state: String,
+    val nextScheduleTimeMillis: Long,
+    val runAttemptCount: Int,
+)
+
 data class UiState(
     val token: String? = null,
     val needsKeySetup: Boolean = false,
     val devices: List<Device> = emptyList(),
-    val activeDevices: Set<String> = emptySet(),
+    val workSchedules: Map<String, WorkScheduleInfo> = emptyMap(),
     val loading: Boolean = false,
     val error: String? = null,
     val serverUrl: String = "",
@@ -63,19 +69,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _state.update { it.copy(loading = true, error = null) }
             try {
                 val devices = repo.loadDevices(oauthToken, sharedKey)
-                val activeDevices = devices.filter { device ->
+                val workSchedules = mutableMapOf<String, WorkScheduleInfo>()
+                for (device in devices) {
                     val workInfos = workManager
                         .getWorkInfosForUniqueWork("periodic_location_${device.id}")
                         .get()
-                    workInfos.any { it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING }
-                }.map { it.id }.toSet()
-                _state.update { it.copy(devices = devices, activeDevices = activeDevices) }
+                    val activeWork = workInfos.firstOrNull {
+                        it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING
+                    }
+                    if (activeWork != null) {
+                        workSchedules[device.id] = WorkScheduleInfo(
+                            state = activeWork.state.name,
+                            nextScheduleTimeMillis = activeWork.nextScheduleTimeMillis,
+                            runAttemptCount = activeWork.runAttemptCount,
+                        )
+                    }
+                }
+                _state.update { it.copy(devices = devices, workSchedules = workSchedules) }
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching devices", e)
                 _state.update { it.copy(error = e.message) }
             } finally {
                 _state.update { it.copy(loading = false) }
             }
+        }
+    }
+
+    fun cancelWork(deviceId: String) {
+        workManager.cancelUniqueWork("periodic_location_$deviceId")
+        _state.update {
+            it.copy(workSchedules = it.workSchedules - deviceId)
         }
     }
 

@@ -7,4 +7,8 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="sign_out">Sign Out</string>
+    <string name="schedule_info">Schedule Info</string>
+    <string name="state">State</string>
+    <string name="next_run">Next Run</string>
+    <string name="run_attempts">Run Attempts</string>
 </resources>
