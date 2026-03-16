@@ -14,7 +14,16 @@ class TokenStorage(context: Context) {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
-        prefs = EncryptedSharedPreferences.create(
+        prefs = try {
+            createEncryptedPrefs(context, masterKey)
+        } catch (e: Exception) {
+            context.deleteSharedPreferences("secure_prefs")
+            createEncryptedPrefs(context, masterKey)
+        }
+    }
+
+    private fun createEncryptedPrefs(context: Context, masterKey: MasterKey): SharedPreferences {
+        return EncryptedSharedPreferences.create(
             context,
             "secure_prefs",
             masterKey,
