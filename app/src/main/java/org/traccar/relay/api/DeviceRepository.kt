@@ -29,28 +29,40 @@ class DeviceRepository(context: Context) {
     private var pendingDeviceId: String? = null
     private var firebaseToken: String? = null
 
-    val savedOauthToken: String? get() = tokenStorage.getToken()
+    val hasCredentials: Boolean
+        get() = tokenStorage.getAasToken() != null && !tokenStorage.getEmail().isNullOrBlank()
 
     fun hasSharedKey(): Boolean = tokenStorage.getSharedKey() != null
 
-    fun saveCredentials(email: String, oauthToken: String) {
-        tokenStorage.saveEmail(email)
-        tokenStorage.saveToken(oauthToken)
+    fun authenticate(email: String, oauthToken: String) {
+        val exchangeResult = GoogleAuthClient.exchangeToken(email, oauthToken, androidId)
+        val aasToken = exchangeResult["Token"]
+            ?: throw Exception("Google authentication failed: ${exchangeResult["Error"] ?: "missing token"}")
+        tokenStorage.saveEmail(exchangeResult["Email"] ?: email)
+        tokenStorage.saveAasToken(aasToken)
     }
 
     fun saveSharedKey(sharedKey: ByteArray) {
         tokenStorage.saveSharedKey(sharedKey.joinToString("") { "%02x".format(it) })
     }
 
+    fun createKeySetupUrl(continueUrl: String): String {
+        val email = tokenStorage.getEmail() ?: throw IllegalStateException("No Google account")
+        val aasToken = tokenStorage.getAasToken() ?: throw IllegalStateException("No AAS token")
+        return GoogleAuthClient.createWebLoginUrl(email, aasToken, androidId, continueUrl)
+    }
+
     fun signOut() {
-        tokenStorage.clear()
+        tokenStorage.clearAuthentication()
     }
 
     val serverUrl: String get() = tokenStorage.getServerUrl() ?: DEFAULT_SERVER_URL
 
-    fun saveServerUrl(url: String) {
-        tokenStorage.saveServerUrl(url)
+    fun saveServerUrl(url: String): String {
+        val normalized = ServerUrlValidator.normalize(url)
+        tokenStorage.saveServerUrl(normalized)
         registerDevicesOnServer()
+        return normalized
     }
 
     fun onFirebaseTokenChanged(token: String) {
@@ -58,9 +70,7 @@ class DeviceRepository(context: Context) {
         registerDevicesOnServer()
     }
 
-    fun loadDevices(oauthToken: String, sharedKey: ByteArray? = null): List<Device> {
-        ensureAasToken(oauthToken)
-
+    fun loadDevices(sharedKey: ByteArray? = null): List<Device> {
         if (sharedKey != null && tokenStorage.getOwnerKey() == null) {
             try {
                 fetchOwnerKey(sharedKey)
@@ -149,16 +159,6 @@ class DeviceRepository(context: Context) {
     }
 
     // Private helpers
-
-    private fun ensureAasToken(oauthToken: String) {
-        if (tokenStorage.getAasToken() != null) return
-        val email = tokenStorage.getEmail() ?: ""
-        val exchangeResult = GoogleAuthClient.exchangeToken(email, oauthToken, androidId)
-        val aasToken = exchangeResult["Token"]
-            ?: throw Exception("Failed to get AAS token: ${exchangeResult["Error"]}")
-        tokenStorage.saveAasToken(aasToken)
-        exchangeResult["Email"]?.let { tokenStorage.saveEmail(it) }
-    }
 
     private fun fetchOwnerKey(sharedKey: ByteArray) {
         val email = tokenStorage.getEmail() ?: ""
