@@ -32,14 +32,6 @@ class TokenStorage(context: Context) {
         )
     }
 
-    fun saveToken(token: String) {
-        prefs.edit { putString(KEY_OAUTH_TOKEN, token) }
-    }
-
-    fun getToken(): String? {
-        return prefs.getString(KEY_OAUTH_TOKEN, null)
-    }
-
     fun saveAasToken(token: String) {
         prefs.edit { putString(KEY_AAS_TOKEN, token) }
     }
@@ -97,12 +89,18 @@ class TokenStorage(context: Context) {
         return raw.split(",").filter { it.isNotEmpty() }
     }
 
-    fun clear() {
-        prefs.edit { clear() }
+    fun clearAuthentication() {
+        prefs.edit {
+            remove(KEY_AAS_TOKEN)
+            remove(KEY_EMAIL)
+            remove(KEY_FCM_CREDENTIALS)
+            remove(KEY_SHARED_KEY)
+            remove(KEY_OWNER_KEY)
+            remove(KEY_DEVICE_IDS)
+        }
     }
 
     companion object {
-        private const val KEY_OAUTH_TOKEN = "oauth_token"
         private const val KEY_AAS_TOKEN = "aas_token"
         private const val KEY_EMAIL = "email"
         private const val KEY_FCM_CREDENTIALS = "fcm_credentials"

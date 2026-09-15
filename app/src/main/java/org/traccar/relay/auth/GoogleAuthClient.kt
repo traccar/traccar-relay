@@ -4,6 +4,9 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.util.concurrent.TimeUnit
 
 object GoogleAuthClient {
 
@@ -13,6 +16,11 @@ object GoogleAuthClient {
 
     private val client = OkHttpClient.Builder()
         .protocols(listOf(Protocol.HTTP_1_1))
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .callTimeout(45, TimeUnit.SECONDS)
+        .followRedirects(false)
+        .followSslRedirects(false)
         .build()
 
     fun exchangeToken(email: String, oauthToken: String, androidId: String): Map<String, String> {
@@ -66,6 +74,37 @@ object GoogleAuthClient {
         return performAuthRequest(body)
     }
 
+    fun createWebLoginUrl(
+        email: String,
+        aasToken: String,
+        androidId: String,
+        continueUrl: String,
+    ): String {
+        val encodedContinueUrl = URLEncoder.encode(continueUrl, StandardCharsets.UTF_8.toString())
+        val body = FormBody.Builder()
+            .add("accountType", "HOSTED_OR_GOOGLE")
+            .add("Email", email)
+            .add("has_permission", "1")
+            .add("EncryptedPasswd", aasToken)
+            .add("service", "weblogin:continue=$encodedContinueUrl")
+            .add("source", "android")
+            .add("androidId", androidId)
+            .add("app", "com.google.android.gms")
+            .add("client_sig", CLIENT_SIG)
+            .add("device_country", "us")
+            .add("operatorCountry", "us")
+            .add("lang", "en")
+            .add("sdk_version", "17")
+            .add("google_play_services_version", "240913000")
+            .build()
+
+        val result = performAuthRequest(body)
+        return result["Auth"]
+            ?: throw IllegalStateException(
+                "Google key setup failed: ${result["Error"] ?: "missing web login URL"}",
+            )
+    }
+
     private fun performAuthRequest(body: FormBody): Map<String, String> {
         val request = Request.Builder()
             .url(AUTH_URL)
@@ -75,14 +114,17 @@ object GoogleAuthClient {
             .header("Accept-Encoding", "identity")
             .build()
 
-        val response = client.newCall(request).execute()
-        val text = response.body?.string() ?: ""
-
-        return text.lines()
-            .filter { it.contains("=") }
-            .associate {
-                val (key, value) = it.split("=", limit = 2)
-                key to value
+        return client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IllegalStateException("Google authentication failed (${response.code})")
             }
+
+            response.body.string().lines()
+                .filter { it.contains("=") }
+                .associate {
+                    val (key, value) = it.split("=", limit = 2)
+                    key to value
+                }
+        }
     }
 }

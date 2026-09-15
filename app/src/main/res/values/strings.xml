@@ -7,6 +7,11 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="sign_out">Sign Out</string>
+    <string name="google_account">Google Account</string>
+    <string name="signed_in">Signed in</string>
+    <string name="not_signed_in">Not signed in</string>
+    <string name="key_setup_required">Key setup required</string>
+    <string name="continue_action">Continue</string>
     <string name="schedule_info">Schedule Info</string>
     <string name="state">State</string>
     <string name="next_run">Next Run</string>

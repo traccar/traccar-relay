@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
@@ -42,7 +43,10 @@ import org.traccar.relay.ui.ShimmerListItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceListScreen(viewModel: MainViewModel) {
+fun DeviceListScreen(
+    viewModel: MainViewModel,
+    onGoogleSetup: () -> Unit,
+) {
     val state by viewModel.state.collectAsState()
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
@@ -103,8 +107,10 @@ fun DeviceListScreen(viewModel: MainViewModel) {
             TopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
-                    TextButton(onClick = { viewModel.signOut() }) {
-                        Text(stringResource(R.string.sign_out))
+                    if (state.authenticated) {
+                        TextButton(onClick = { viewModel.signOut() }) {
+                            Text(stringResource(R.string.sign_out))
+                        }
                     }
                 },
             )
@@ -119,7 +125,37 @@ fun DeviceListScreen(viewModel: MainViewModel) {
                     modifier = Modifier.clickable { showUrlDialog = true },
                 )
             }
-            if (state.loading) {
+            item {
+                ListItem(
+                    leadingContent = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
+                    headlineContent = { Text(stringResource(R.string.google_account)) },
+                    supportingContent = {
+                        Text(
+                            stringResource(
+                                when {
+                                    !state.authenticated -> R.string.not_signed_in
+                                    state.needsKeySetup -> R.string.key_setup_required
+                                    else -> R.string.signed_in
+                                },
+                            ),
+                        )
+                    },
+                    trailingContent = {
+                        if (!state.authenticated || state.needsKeySetup) {
+                            TextButton(onClick = onGoogleSetup) {
+                                Text(
+                                    stringResource(
+                                        if (state.authenticated) R.string.continue_action else R.string.sign_in,
+                                    ),
+                                )
+                            }
+                        }
+                    },
+                )
+            }
+            if (!state.authenticated || state.needsKeySetup) {
+                // Device data requires Google authentication.
+            } else if (state.loading) {
                 items(3) { ShimmerListItem() }
             } else if (state.error != null) {
                 item {
