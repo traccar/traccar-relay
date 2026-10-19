@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit
 
 class PushNotificationService : FirebaseMessagingService() {
 
-    override fun onNewToken(token: String) {
-        DeviceRepository(this).onFirebaseTokenChanged(token)
+    override fun onRegistered(installationId: String) {
+        DeviceRepository(this).onFirebaseRegistered(installationId)
     }
 
     override fun onMessageReceived(message: RemoteMessage) {

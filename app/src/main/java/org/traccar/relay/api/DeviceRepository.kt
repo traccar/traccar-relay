@@ -27,7 +27,7 @@ class DeviceRepository(context: Context) {
     private var mcsClient: McsClient? = null
     private var pendingRequestUuid: String? = null
     private var pendingDeviceId: String? = null
-    private var firebaseToken: String? = null
+    private var firebaseInstallationId: String? = null
 
     val savedOauthToken: String? get() = tokenStorage.getToken()
 
@@ -53,8 +53,8 @@ class DeviceRepository(context: Context) {
         registerDevicesOnServer()
     }
 
-    fun onFirebaseTokenChanged(token: String) {
-        firebaseToken = token
+    fun onFirebaseRegistered(installationId: String) {
+        firebaseInstallationId = installationId
         registerDevicesOnServer()
     }
 
@@ -345,13 +345,13 @@ class DeviceRepository(context: Context) {
 
     private fun registerDevicesOnServer() {
         val serverUrl = tokenStorage.getServerUrl() ?: return
-        val firebaseToken = firebaseToken ?: return
+        val installationId = firebaseInstallationId ?: return
         val deviceIds = tokenStorage.getDeviceIds()
         if (deviceIds.isEmpty()) return
 
         for (id in deviceIds) {
             try {
-                TraccarApiClient.registerDevice(serverUrl, id, firebaseToken)
+                TraccarApiClient.registerDevice(serverUrl, id, installationId)
             } catch (e: Exception) {
                 Log.e(TAG, "Error registering device $id", e)
             }

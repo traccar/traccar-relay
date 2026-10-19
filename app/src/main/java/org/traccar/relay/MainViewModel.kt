@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.installations.FirebaseInstallations
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import org.traccar.relay.api.Device
@@ -40,11 +41,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val state: StateFlow<UiState> = _state
 
     init {
-        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
-            viewModelScope.launch(Dispatchers.IO) {
-                repo.onFirebaseTokenChanged(token)
+        FirebaseMessaging.getInstance().register()
+            .onSuccessTask { FirebaseInstallations.getInstance().id }
+            .addOnSuccessListener { installationId ->
+                viewModelScope.launch(Dispatchers.IO) {
+                    repo.onFirebaseRegistered(installationId)
+                }
             }
-        }
         val oauthToken = repo.savedOauthToken
         if (oauthToken != null) {
             _state.update { it.copy(needsKeySetup = !repo.hasSharedKey()) }
