@@ -121,7 +121,7 @@ object FcmRegistrationClient {
             .build()
 
         val response = client.newCall(request).execute()
-        val bytes = response.body?.bytes() ?: throw Exception("Empty checkin response")
+        val bytes = response.body.bytes()
         return AndroidCheckinResponse.ADAPTER.decode(bytes)
     }
 
@@ -144,7 +144,7 @@ object FcmRegistrationClient {
                 .build()
 
             val response = client.newCall(request).execute()
-            val text = response.body?.string() ?: throw Exception("Empty GCM register response")
+            val text = response.body.string()
 
             if (text.contains("Error")) {
                 if (attempt < 5) {
@@ -219,7 +219,7 @@ object FcmRegistrationClient {
             .build()
 
         val response = client.newCall(request).execute()
-        val text = response.body?.string() ?: throw Exception("Empty FCM install response")
+        val text = response.body.string()
 
         if (response.code != 200) {
             throw Exception("FCM install error ${response.code}: $text")
@@ -253,7 +253,7 @@ object FcmRegistrationClient {
             .build()
 
         val response = client.newCall(request).execute()
-        val text = response.body?.string() ?: throw Exception("Empty FCM register response")
+        val text = response.body.string()
 
         if (response.code != 200) {
             throw Exception("FCM register error ${response.code}: $text")

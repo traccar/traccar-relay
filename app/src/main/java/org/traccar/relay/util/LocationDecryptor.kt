@@ -91,7 +91,7 @@ object LocationDecryptor {
 
         // Derive receiver scalar
         val k = 10
-        val maskedTimestamp = (timestamp and (0xFFFFFFFF shl k).toLong()).toInt()
+        val maskedTimestamp = (timestamp and (0xFFFFFFFF shl k)).toInt()
         val tsBytes = ByteBuffer.allocate(4).putInt(maskedTimestamp).array()
         val block = ByteArray(32)
         for (i in 0 until 11) block[i] = 0xFF.toByte()

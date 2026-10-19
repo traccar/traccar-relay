@@ -50,7 +50,7 @@ object NovaApiClient {
             .build()
 
         val response = client.newCall(request).execute()
-        val bytes = response.body?.bytes() ?: return emptyList()
+        val bytes = response.body.bytes()
 
         val devicesList = DevicesList.ADAPTER.decode(bytes)
         val result = mutableListOf<Device>()

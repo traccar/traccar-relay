@@ -36,7 +36,7 @@ object SpotApiClient {
             .build()
 
         val response = client.newCall(request).execute()
-        val body = response.body?.bytes() ?: throw Exception("Empty Spot API response")
+        val body = response.body.bytes()
 
         if (body.size < 5) throw Exception("Invalid gRPC response")
 

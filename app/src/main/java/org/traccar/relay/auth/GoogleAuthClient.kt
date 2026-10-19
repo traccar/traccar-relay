@@ -76,7 +76,7 @@ object GoogleAuthClient {
             .build()
 
         val response = client.newCall(request).execute()
-        val text = response.body?.string() ?: ""
+        val text = response.body.string()
 
         return text.lines()
             .filter { it.contains("=") }
