@@ -56,6 +56,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onTokenReceived(email: String, token: String) {
+        Log.i(TAG, "Sign-in completed")
         repo.saveCredentials(email, token)
         _state.update { it.copy(token = token, needsKeySetup = !repo.hasSharedKey()) }
         loadDevices(token)
@@ -88,6 +89,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         )
                     }
                 }
+                Log.i(TAG, "Loaded ${devices.size} devices")
                 _state.update { it.copy(devices = devices, workSchedules = workSchedules) }
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching devices", e)

@@ -32,7 +32,7 @@ fun LogsScreen(onBack: () -> Unit) {
                 val process = ProcessBuilder(
                     "logcat", "-d", "-v", "threadtime", "-t", "300", "--uid=${Process.myUid()}",
                     "MainActivity:V", "MainViewModel:V", "DeviceRepository:V", "KeySetupScreen:V",
-                    "McsClient:V", "PushNotificationService:V", "LocationWorker:V", "*:S",
+                    "McsClient:V", "PushNotificationService:V", "LocationWorker:V", "TraccarApiClient:V", "*:S",
                 ).redirectErrorStream(true).start()
                 try {
                     val output = process.inputStream.bufferedReader().use { it.readLines() }

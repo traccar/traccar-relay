@@ -23,6 +23,7 @@ class PushNotificationService : FirebaseMessagingService() {
         val deviceId = message.data["deviceId"] ?: return
         when (message.data["command"]) {
             "positionSingle" -> {
+                Log.i(TAG, "Location requested for device $deviceId")
                 try {
                     DeviceRepository(this).requestAndUploadLocation(deviceId)
                 } catch (e: Exception) {
@@ -33,6 +34,7 @@ class PushNotificationService : FirebaseMessagingService() {
                 val interval = message.data["interval"]?.toLongOrNull()
                     ?.coerceAtLeast(PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS / 1000)
                     ?: return
+                Log.i(TAG, "Periodic requests for device $deviceId every $interval seconds")
                 val workRequest = PeriodicWorkRequestBuilder<LocationWorker>(
                     interval, TimeUnit.SECONDS,
                 ).setConstraints(
@@ -49,6 +51,7 @@ class PushNotificationService : FirebaseMessagingService() {
                 )
             }
             "positionStop" -> {
+                Log.i(TAG, "Stopping periodic requests for device $deviceId")
                 WorkManager.getInstance(this).cancelUniqueWork("$WORK_NAME_PREFIX$deviceId")
             }
         }

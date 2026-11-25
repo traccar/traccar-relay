@@ -1,5 +1,6 @@
 package org.traccar.relay.api
 
+import android.util.Log
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -40,6 +41,12 @@ object TraccarApiClient {
             .url(serverUrl)
             .post(body.build())
             .build()
-        client.newCall(request).execute().close()
+        client.newCall(request).execute().use { response ->
+            Log.println(
+                if (response.isSuccessful) Log.INFO else Log.WARN,
+                "TraccarApiClient",
+                "Location upload for device $deviceId: HTTP ${response.code}",
+            )
+        }
     }
 }

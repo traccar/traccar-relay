@@ -119,7 +119,9 @@ class DeviceRepository(context: Context) {
 
         try {
             requestLocation(deviceId)
-            latch.await(30, TimeUnit.SECONDS)
+            if (!latch.await(30, TimeUnit.SECONDS)) {
+                Log.w(TAG, "Location request timed out for device $deviceId")
+            }
         } finally {
             stopPushConnection()
             thread.join(5000)
@@ -127,7 +129,10 @@ class DeviceRepository(context: Context) {
 
         val entry = result?.locations
             ?.firstOrNull { it.latitude != null && it.longitude != null }
-            ?: return
+            ?: run {
+                Log.w(TAG, "No usable location for device $deviceId")
+                return
+            }
 
         TraccarApiClient.sendLocation(
             serverUrl, deviceId,
