@@ -42,7 +42,7 @@ import org.traccar.relay.ui.ShimmerListItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceListScreen(viewModel: MainViewModel) {
+fun DeviceListScreen(viewModel: MainViewModel, onShowLogs: () -> Unit) {
     val state by viewModel.state.collectAsState()
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
@@ -103,6 +103,9 @@ fun DeviceListScreen(viewModel: MainViewModel) {
             TopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
+                    TextButton(onClick = onShowLogs) {
+                        Text(stringResource(R.string.logs))
+                    }
                     TextButton(onClick = { viewModel.signOut() }) {
                         Text(stringResource(R.string.sign_out))
                     }

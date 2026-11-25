@@ -11,4 +11,7 @@
     <string name="state">State</string>
     <string name="next_run">Next Run</string>
     <string name="run_attempts">Run Attempts</string>
+    <string name="logs">Logs</string>
+    <string name="back">Back</string>
+    <string name="logs_error">Unable to read logs.</string>
 </resources>
