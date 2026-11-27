@@ -21,6 +21,7 @@ import org.traccar.relay.proto.GcmCloudMessagingIdProtobuf
 import org.traccar.relay.proto.IdentifierInformationType
 import org.traccar.relay.proto.SpotContributorType
 import org.traccar.relay.proto.Time
+import java.io.IOException
 import java.util.UUID
 
 data class Device(val name: String, val id: String)
@@ -49,8 +50,12 @@ object NovaApiClient {
             .header("User-Agent", USER_AGENT)
             .build()
 
-        val response = client.newCall(request).execute()
-        val bytes = response.body.bytes()
+        val bytes = client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IOException("Nova nbe_list_devices failed: HTTP ${response.code}")
+            }
+            response.body.bytes()
+        }
 
         val devicesList = DevicesList.ADAPTER.decode(bytes)
         val result = mutableListOf<Device>()
@@ -81,7 +86,11 @@ object NovaApiClient {
             .header("User-Agent", USER_AGENT)
             .build()
 
-        client.newCall(request).execute()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IOException("Nova nbe_execute_action failed: HTTP ${response.code}")
+            }
+        }
     }
 
     fun buildLocationRequest(
