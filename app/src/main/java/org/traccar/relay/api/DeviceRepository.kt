@@ -220,6 +220,12 @@ class DeviceRepository(context: Context) {
         tokenStorage.saveFcmCredentials(json.toString())
     }
 
+    private fun headerParameter(header: String?, name: String): String? =
+        header?.split(';')
+            ?.map { it.split('=', limit = 2) }
+            ?.firstOrNull { it.size == 2 && it[0].trim() == name }
+            ?.get(1)?.trim()?.removeSurrounding("\"")?.takeIf { it.isNotEmpty() }
+
     private fun handlePushMessage(
         creds: FcmCredentials,
         message: org.traccar.relay.proto.mcs.DataMessageStanza,
@@ -228,8 +234,8 @@ class DeviceRepository(context: Context) {
         try {
             val appDataMap = message.app_data.associate { it.key to it.value_ }
 
-            val cryptoKey = appDataMap["crypto-key"]?.removePrefix("dh=") ?: return
-            val salt = appDataMap["encryption"]?.removePrefix("salt=") ?: return
+            val cryptoKey = headerParameter(appDataMap["crypto-key"], "dh") ?: return
+            val salt = headerParameter(appDataMap["encryption"], "salt") ?: return
             val rawData = message.raw_data?.toByteArray() ?: return
 
             val decrypted = HttpEceDecryptor.decrypt(
