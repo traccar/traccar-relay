@@ -57,7 +57,9 @@ fun KeySetupScreen(onSharedKeyReceived: (ByteArray) -> Unit) {
                                 val finderArray = json.optJSONArray("finder_hw")
                                     ?: throw Exception("No finder_hw key in vault")
                                 if (finderArray.length() > 0) {
-                                    val entry = finderArray.getJSONObject(0)
+                                    val entry = (0 until finderArray.length())
+                                        .map { finderArray.getJSONObject(it) }
+                                        .maxBy { it.getLong("epoch") }
                                     val keyObj = entry.getJSONObject("key")
                                     val keyBytes = ByteArray(keyObj.length())
                                     for (j in 0 until keyObj.length()) {
