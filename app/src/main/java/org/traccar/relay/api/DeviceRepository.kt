@@ -233,6 +233,7 @@ class DeviceRepository(context: Context) {
     ) {
         try {
             val appDataMap = message.app_data.associate { it.key to it.value_ }
+            if (appDataMap["subtype"] != creds.gcmAppId) return
 
             val cryptoKey = headerParameter(appDataMap["crypto-key"], "dh") ?: return
             val salt = headerParameter(appDataMap["encryption"], "salt") ?: return
